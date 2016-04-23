@@ -11,5 +11,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        FragmentManager fm = getSupportFragmentManager();
+//        fm.beginTransaction()
+//                .add(R.id.app_status_container, AppStatusFragment.newInstance("a", "b"))
+//                .commit();
+
+        AppStatusView appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
+
     }
 }
