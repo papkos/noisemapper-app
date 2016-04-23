@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.InCallState;
@@ -46,6 +45,7 @@ public class PhoneStateService extends Service {
     protected Sensor lightSensor;
     float[] mGravity;
     float[] mGeomagnetic;
+    boolean receiversRegistered = false;
 
     protected Orientation orientation = new Orientation(0, 0, 0);
     protected float proximity = 0;
@@ -173,10 +173,7 @@ public class PhoneStateService extends Service {
     }
 
     private String makeProximityText(float proximity) {
-        return String.format(Locale.US, "%s (%.1f cm)",
-                (proximity < proximitySensor.getMaximumRange() ? "near" : "far"),
-                proximity
-        );
+        return (proximity < proximitySensor.getMaximumRange() ? "near" : "far");
     }
 
     public void requestPhoneState(PhoneStateRequestListener listener) {
@@ -198,18 +195,24 @@ public class PhoneStateService extends Service {
     }
 
     private void registerEvents() {
+        if (receiversRegistered) return;
+
         sensorManager.registerListener(orientationListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(orientationListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_UI);
         registerReceiver(callStateListener, new IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED));
+        receiversRegistered = true;
     }
 
     private void unregisterFromEvents() {
+        if (! receiversRegistered) return;
+
         sensorManager.unregisterListener(orientationListener);
         sensorManager.unregisterListener(proximityListener);
         sensorManager.unregisterListener(lightSensorListener);
         unregisterReceiver(callStateListener);
+        receiversRegistered = false;
     }
 
     public class PSSBinder extends Binder {

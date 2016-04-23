@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AppStatusView">
-        <attr name="appStatusViewStyle" format="reference"/>
+    <declare-styleable name="PhoneStatusView">
+        <attr name="phoneStatusViewStyle" format="reference"/>
     </declare-styleable>
 </resources>

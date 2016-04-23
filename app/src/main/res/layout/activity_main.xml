@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <no.uio.ifi.akosp.noisemapper.ui.AppStatusView
+        <no.uio.ifi.akosp.noisemapper.ui.PhoneStatusView
             android:id="@+id/appStatusView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

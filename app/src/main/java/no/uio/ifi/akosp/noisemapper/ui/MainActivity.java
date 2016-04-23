@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
     protected boolean psServiceBound;
     protected PhoneStateService psService;
 
-    private AppStatusView appStatusView;
+    private PhoneStatusView phoneStatusView;
 
     protected Handler handler = new Handler();
 
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
+        phoneStatusView = (PhoneStatusView) findViewById(R.id.appStatusView);
     }
 
     @Override
@@ -82,6 +82,6 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
 
     @Override
     public void onStateAvailable(State state) {
-        appStatusView.setState(state);
+        phoneStatusView.setState(state);
     }
 }

@@ -22,9 +22,9 @@ import no.uio.ifi.akosp.noisemapper.model.State;
  *
  * @author Ákos Pap
  */
-public class AppStatusView extends CardView {
+public class PhoneStatusView extends CardView {
 
-    public static final String TAG = "AppStatusView";
+    public static final String TAG = "PhoneStatusView";
 
     @Bind(R.id.orientation)
     protected TextView orientationDisplay;
@@ -85,24 +85,24 @@ public class AppStatusView extends CardView {
         }
     }
 
-    public AppStatusView(Context context) {
-        super(context, null, R.attr.appStatusViewStyle);
-        init(context, null, R.attr.appStatusViewStyle);
+    public PhoneStatusView(Context context) {
+        super(context, null, R.attr.phoneStatusViewStyle);
+        init(context, null, R.attr.phoneStatusViewStyle);
     }
 
-    public AppStatusView(Context context, AttributeSet attrs) {
-        super(context, attrs, R.attr.appStatusViewStyle);
-        init(context, attrs, R.attr.appStatusViewStyle);
+    public PhoneStatusView(Context context, AttributeSet attrs) {
+        super(context, attrs, R.attr.phoneStatusViewStyle);
+        init(context, attrs, R.attr.phoneStatusViewStyle);
     }
 
-    public AppStatusView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PhoneStatusView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs, defStyleAttr);
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         // TODO: custom initialization
-        inflate(getContext(), R.layout.view_app_status, this);
+        inflate(getContext(), R.layout.view_phone_status, this);
         ButterKnife.bind(this, getRootView());
     }
 
