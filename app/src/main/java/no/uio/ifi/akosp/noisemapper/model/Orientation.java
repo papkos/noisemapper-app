@@ -1,5 +1,6 @@
 package no.uio.ifi.akosp.noisemapper.model;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Locale;
  *
  * @author Ákos Pap
  */
-public class Orientation {
+public class Orientation implements Serializable {
     public float azimuth;
     public float pitch;
     public float roll;

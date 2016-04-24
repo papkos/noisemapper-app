@@ -41,8 +41,8 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
 
     private Handler handler = new Handler();
     protected State state;
-    private String filename;
-    private boolean forceRun = false;
+    protected File outFile;
+    protected boolean forceRun = false;
 
     public static Intent startOneOff(Context context) {
         Intent intent = new Intent(context, SnippetRecorderService.class);
@@ -93,7 +93,6 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
             Log.w(TAG, "Service started, but not enabled. Checking status...");
             stopSelf(startId);
             startService(makeCheckIntent(componentName, ACTION_START_SNIPPET));
-            return;
         }
     }
 
@@ -134,7 +133,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
         FileWriter fw = null;
         try {
             fw = new FileWriter(log, true);
-            String logMessage = Utils.stateToJson(state, filename);
+            String logMessage = Utils.stateToJson(state, outFile.getName());
             fw.write(logMessage);
             fw.write("\n");
             fw.flush();
@@ -150,6 +149,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
         }
 
         Log.i(TAG, "Work is done, stopping service.");
+        unbindService(psConnection);
         SnippetRecorderService.this.stopSelf();
     }
 
@@ -162,8 +162,8 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
 
         recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        filename = getFilename();
-        recorder.setOutputFile(filename);
+        outFile = getOutFile();
+        recorder.setOutputFile(outFile.getPath());
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -184,12 +184,12 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
             bindService(intent, psConnection, Context.BIND_AUTO_CREATE);
         }
 
-        Log.i(TAG, "Started recording into " + new File(filename).getName());
+        Log.i(TAG, "Started recording into " + outFile.getName());
     }
 
-    private String getFilename() {
+    private File getOutFile() {
         final String filename = "record_" + FILENAME_FORMATTER.format(new Date()) + ".3gp";
-        return new File(outFolder, filename).getAbsolutePath();
+        return new File(outFolder, filename);
     }
 
     private void stopRecording() {
