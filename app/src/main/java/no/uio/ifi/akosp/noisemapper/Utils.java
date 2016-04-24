@@ -1,5 +1,11 @@
 package no.uio.ifi.akosp.noisemapper;
 
+import android.content.Context;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import no.uio.ifi.akosp.noisemapper.model.Orientation;
 import no.uio.ifi.akosp.noisemapper.model.State;
 
@@ -9,6 +15,8 @@ import no.uio.ifi.akosp.noisemapper.model.State;
  * @author Ákos Pap
  */
 public class Utils {
+
+    public static final String TAG = "Utils";
 
     public static boolean isInPocket(State state) {
         return isInPocket(state.getOrientation(), state.getProximity(), state.getLight());
@@ -28,5 +36,36 @@ public class Utils {
                 )
 
         );
+    }
+
+    public static void sendRefreshBroadcast(Context context) {
+//        LocalBroadcastManager.getInstance(context)
+//                .sendBroadcast(RecordingListFragment.getRefreshIntent());
+    }
+
+    public static String stateToJson(State state, String filename) {
+        JSONObject root = new JSONObject();
+
+        try {
+            JSONObject orientation = new JSONObject();
+            orientation.put("azimuth", state.getOrientation().azimuth);
+            orientation.put("pitch", state.getOrientation().pitch);
+            orientation.put("roll", state.getOrientation().roll);
+            root.put("orientation", orientation);
+
+            root.put("proximity", state.getProximity());
+            root.put("proximityText", state.getProximityText());
+            root.put("light", state.getLight());
+            root.put("inPocket", state.isInPocket());
+            root.put("inCallState", state.getInCallState().name());
+            root.put("timestamp", state.getTimestampString());
+
+            root.put("file", filename);
+
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to serialize a state to JSON.", e);
+        }
+
+        return root.toString();
     }
 }

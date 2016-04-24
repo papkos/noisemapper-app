@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="no.uio.ifi.akosp.noisemapper">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".NoiseMapperApp"
         android:allowBackup="true"
@@ -18,7 +21,10 @@
         </activity>
         <service
             android:name=".services.PhoneStateService"
-            android:exported="false"/>
+            android:exported="false" />
+        <service
+            android:name=".services.SnippetRecorderService"
+            android:exported="false" />
     </application>
 
 </manifest>

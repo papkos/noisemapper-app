@@ -9,10 +9,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
+import no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService;
 
 public class MainActivity extends AppCompatActivity implements PhoneStateService.PhoneStateRequestListener {
 
@@ -61,6 +64,14 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         setContentView(R.layout.activity_main);
 
         phoneStatusView = (PhoneStatusView) findViewById(R.id.appStatusView);
+        Button oneOff = (Button) findViewById(R.id.oneOff);
+        //noinspection ConstantConditions
+        oneOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SnippetRecorderService.startOneOff(MainActivity.this);
+            }
+        });
     }
 
     @Override

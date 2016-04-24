@@ -19,6 +19,13 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/activity_horizontal_margin"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Record one snippet with state"
+            android:id="@+id/oneOff"
+            android:layout_gravity="center_horizontal" />
+
     </LinearLayout>
 </ScrollView>
 
