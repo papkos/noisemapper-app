@@ -1,12 +1,19 @@
 package no.uio.ifi.akosp.noisemapper.ui;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 import java.util.Locale;
 
@@ -22,7 +29,7 @@ import no.uio.ifi.akosp.noisemapper.model.State;
  *
  * @author Ákos Pap
  */
-public class PhoneStatusView extends CardView {
+public class PhoneStatusView extends CardView implements OnMapReadyCallback {
 
     public static final String TAG = "PhoneStatusView";
 
@@ -41,6 +48,9 @@ public class PhoneStatusView extends CardView {
     @Bind(R.id.isInCall)
     protected CheckBox isInCallDisplay;
 
+    @Bind(R.id.phoneLocation)
+    protected MapView phoneLocationView;
+
     protected State state;
     protected boolean ready = false;
 
@@ -57,7 +67,7 @@ public class PhoneStatusView extends CardView {
     }
 
     protected void updateViews() {
-        if (! ready) return;
+        if (!ready) return;
 
         final Orientation orientation = state.getOrientation();
         orientationDisplay.setText(String.format(Locale.US, "X: %.0f° | Y: %.0f° | Z: %.0f°",
@@ -84,6 +94,8 @@ public class PhoneStatusView extends CardView {
                 isInCallDisplay.setChecked(false);
                 break;
         }
+
+        phoneLocationView.getMapAsync(this);
     }
 
     public PhoneStatusView(Context context) {
@@ -122,17 +134,33 @@ public class PhoneStatusView extends CardView {
     @Override
     public void onRestoreInstanceState(Parcelable state) {
         //begin boilerplate code so parent classes can restore state
-        if(!(state instanceof SavedState)) {
+        if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
 
-        SavedState ss = (SavedState)state;
+        SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         //end
 
         this.state = ss.stateToSave;
         updateViews();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
     }
 
     static class SavedState extends BaseSavedState {

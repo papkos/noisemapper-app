@@ -48,10 +48,15 @@ public class Utils {
 
         try {
             JSONObject orientation = new JSONObject();
-            orientation.put("azimuth", state.getOrientation().azimuth);
-            orientation.put("pitch", state.getOrientation().pitch);
-            orientation.put("roll", state.getOrientation().roll);
+                orientation.put("azimuth", state.getOrientation().azimuth);
+                orientation.put("pitch", state.getOrientation().pitch);
+                orientation.put("roll", state.getOrientation().roll);
             root.put("orientation", orientation);
+
+            JSONObject location = new JSONObject();
+                location.put("lat", state.getLocation().getLatitude());
+                location.put("lon", state.getLocation().getLongitude());
+            root.put("location", location);
 
             root.put("proximity", state.getProximity());
             root.put("proximityText", state.getProximityText());

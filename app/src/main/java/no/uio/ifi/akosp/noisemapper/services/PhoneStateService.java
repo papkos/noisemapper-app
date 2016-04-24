@@ -1,19 +1,29 @@
 package no.uio.ifi.akosp.noisemapper.services;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +41,7 @@ import no.uio.ifi.akosp.noisemapper.model.State;
  *
  * @author Ákos Pap
  */
-public class PhoneStateService extends Service {
+public class PhoneStateService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = "PhoneStateService";
 
@@ -52,7 +62,7 @@ public class PhoneStateService extends Service {
     protected float light = 0;
     protected InCallState inCallState = InCallState.NO_CALL;
 
-    protected boolean[] dataAvailable = new boolean[4];
+    protected boolean[] dataAvailable = new boolean[5];
 
     protected SensorEventListener orientationListener = new SensorEventListener() {
         /* Based on http://www.codingforandroid.com/2011/01/using-orientation-sensors-simple.html */
@@ -76,7 +86,8 @@ public class PhoneStateService extends Service {
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
     };
 
     protected SensorEventListener proximityListener = new SensorEventListener() {
@@ -89,7 +100,8 @@ public class PhoneStateService extends Service {
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
     };
 
     protected SensorEventListener lightSensorListener = new SensorEventListener() {
@@ -102,7 +114,8 @@ public class PhoneStateService extends Service {
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
     };
 
     protected BroadcastReceiver callStateListener = new BroadcastReceiver() {
@@ -124,10 +137,13 @@ public class PhoneStateService extends Service {
     private List<PhoneStateRequestListener> listeners =
             Collections.synchronizedList(new ArrayList<PhoneStateRequestListener>());
 
+    private GoogleApiClient mGoogleApiClient;
+    private Location location;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -144,6 +160,16 @@ public class PhoneStateService extends Service {
             inCallState = InCallState.NO_CALL;
         }
         dataAvailable[3] = true;
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+        mGoogleApiClient.connect();
     }
 
     protected void dataAvailable(int dataType) {
@@ -156,9 +182,9 @@ public class PhoneStateService extends Service {
         }
 
         State state = new State(orientation, proximity, makeProximityText(proximity), light,
-                Utils.isInPocket(orientation, proximity, light), inCallState, new Date());
+                Utils.isInPocket(orientation, proximity, light), inCallState, location, new Date());
 
-        if (! listeners.isEmpty()) {
+        if (!listeners.isEmpty()) {
             Iterator<PhoneStateRequestListener> it = listeners.iterator();
             while (it.hasNext()) {
                 PhoneStateRequestListener listener = it.next();
@@ -192,6 +218,7 @@ public class PhoneStateService extends Service {
     public void onDestroy() {
         super.onDestroy();
         unregisterFromEvents();
+        mGoogleApiClient.disconnect();
     }
 
     private void registerEvents() {
@@ -206,13 +233,40 @@ public class PhoneStateService extends Service {
     }
 
     private void unregisterFromEvents() {
-        if (! receiversRegistered) return;
+        if (!receiversRegistered) return;
 
         sensorManager.unregisterListener(orientationListener);
         sensorManager.unregisterListener(proximityListener);
         sensorManager.unregisterListener(lightSensorListener);
         unregisterReceiver(callStateListener);
         receiversRegistered = false;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle connectionHint) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        dataAvailable(4);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     public class PSSBinder extends Binder {

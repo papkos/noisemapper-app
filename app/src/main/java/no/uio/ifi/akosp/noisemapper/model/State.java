@@ -1,5 +1,7 @@
 package no.uio.ifi.akosp.noisemapper.model;
 
+import android.location.Location;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +21,7 @@ public class State implements Serializable {
     public static final int CHANGE_PITCH = 1 << 3;
     public static final int CHANGE_ROLL = 1 << 4;
     public static final int CHANGE_IN_CALL_STATE = 1 << 5;
+    public static final int CHANGE_LOCATION = 1 << 6;
 
     public static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy. MM. dd. HH:mm.ss", Locale.US);
 
@@ -30,16 +33,19 @@ public class State implements Serializable {
     protected final boolean inPocket;
     protected final InCallState inCallState;
 
+    protected final Location location;
+
     protected final Date timestamp;
     protected int changes;
 
-    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Date timestamp) {
+    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, Date timestamp) {
         this.orientation = position;
         this.proximity = proximity;
         this.proximityText = proximityText;
         this.light = light;
         this.inPocket = inPocket;
         this.inCallState = inCallState;
+        this.location = location;
         this.timestamp = timestamp;
     }
 
@@ -81,5 +87,9 @@ public class State implements Serializable {
 
     public int getChanges() {
         return changes;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }
