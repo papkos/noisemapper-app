@@ -12,18 +12,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
 import no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService;
 
-public class MainActivity extends AppCompatActivity implements PhoneStateService.PhoneStateRequestListener {
+public class MainActivity extends AppCompatActivity implements PhoneStateService.PhoneStateRequestListener, AppStatusView.AppStatusViewInteractionListener {
 
     public static final String TAG = "MainActivity";
+
     protected boolean psServiceBound;
     protected PhoneStateService psService;
+    protected NoiseMapperApp app;
 
     private PhoneStatusView phoneStatusView;
+    private AppStatusView appStatusView;
 
     protected Handler handler = new Handler();
 
@@ -63,7 +67,13 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        phoneStatusView = (PhoneStatusView) findViewById(R.id.appStatusView);
+        app = (NoiseMapperApp) getApplication();
+
+        phoneStatusView = (PhoneStatusView) findViewById(R.id.phoneStatusView);
+        appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
+        appStatusView.setCallback(this);
+        appStatusView.setSoundServiceEnabled(app.isRecurringServiceEnabled(SnippetRecorderService.SERVICE_ID));
+
         Button oneOff = (Button) findViewById(R.id.oneOff);
         //noinspection ConstantConditions
         oneOff.setOnClickListener(new View.OnClickListener() {
@@ -94,5 +104,14 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
     @Override
     public void onStateAvailable(State state) {
         phoneStatusView.setState(state);
+    }
+
+    @Override
+    public void onSoundServiceSwitchChanged(boolean checked) {
+        app.setServiceEnabled(SnippetRecorderService.SERVICE_ID, checked);
+        startService(SnippetRecorderService.makeCheckIntent(
+                new ComponentName(this, SnippetRecorderService.class),
+                SnippetRecorderService.ACTION_START_SNIPPET
+        ));
     }
 }

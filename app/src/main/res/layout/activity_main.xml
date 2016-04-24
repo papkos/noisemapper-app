@@ -13,7 +13,7 @@
         android:layout_height="wrap_content">
 
         <no.uio.ifi.akosp.noisemapper.ui.PhoneStatusView
-            android:id="@+id/appStatusView"
+            android:id="@+id/phoneStatusView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -25,6 +25,13 @@
             android:text="Record one snippet with state"
             android:id="@+id/oneOff"
             android:layout_gravity="center_horizontal" />
+
+        <no.uio.ifi.akosp.noisemapper.ui.AppStatusView
+            android:id="@+id/appStatusView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/activity_horizontal_margin"/>
 
     </LinearLayout>
 </ScrollView>

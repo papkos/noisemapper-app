@@ -51,4 +51,19 @@ public class NoiseMapperApp extends Application
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         return preferences.getBoolean(PREF_SERVICE_ENABLED + serviceId, false);
     }
+
+    public void enableService(String serviceId) {
+        setServiceEnabled(serviceId, true);
+    }
+
+    public void disableService(String serviceId) {
+        setServiceEnabled(serviceId, false);
+    }
+
+    public void setServiceEnabled(String serviceId, boolean enabled) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(PREF_SERVICE_ENABLED + serviceId, enabled);
+        editor.apply();
+    }
 }

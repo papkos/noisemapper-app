@@ -6,10 +6,11 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="phoneStatusViewStyle">@style/DefaultPhoneStatusStyle</item>
+        <item name="phoneStatusViewStyle">@style/DefaultStatusCardStyle</item>
+        <item name="appStatusViewStyle">@style/DefaultStatusCardStyle</item>
     </style>
 
-    <style name="DefaultPhoneStatusStyle">
+    <style name="DefaultStatusCardStyle">
         <item name="android:padding">5dp</item>
         <item name="cardBackgroundColor">@android:color/white</item>
         <item name="contentPadding">16dp</item>

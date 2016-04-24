@@ -52,6 +52,7 @@ public class PhoneStatusView extends CardView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        ButterKnife.bind(this, getRootView());
         ready = true;
     }
 
@@ -103,7 +104,6 @@ public class PhoneStatusView extends CardView {
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         // TODO: custom initialization
         inflate(getContext(), R.layout.view_phone_status, this);
-        ButterKnife.bind(this, getRootView());
     }
 
     @Override

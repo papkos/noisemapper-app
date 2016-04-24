@@ -28,6 +28,8 @@ import no.uio.ifi.akosp.noisemapper.model.State;
 public class SnippetRecorderService extends RecurringService implements PhoneStateService.PhoneStateRequestListener {
     public static final String TAG = "SnippetRecorderService";
 
+    public static final String SERVICE_ID = SnippetRecorderService.class.getSimpleName();
+
     public static final String ACTION_START_SNIPPET = "SnippetRecorderService::StartSnippet";
     public static final String EXTRA_FORCE_RUN = "SnippetRecorderService::ForceRun";
 
@@ -77,7 +79,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
 
     @Override
     public String getServiceId() {
-        return this.getClass().getSimpleName();
+        return SERVICE_ID;
     }
 
     /**
