@@ -4,7 +4,9 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".NoiseMapperApp"
@@ -20,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".services.PhoneStateService"
             android:exported="false" />
@@ -29,7 +32,8 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="***REMOVED***"/>
+            android:value="@string/google_maps_key" />
+
     </application>
 
 </manifest>

@@ -33,7 +33,7 @@ public class State implements Serializable {
     protected final boolean inPocket;
     protected final InCallState inCallState;
 
-    protected final Location location;
+    protected final SimpleLocation location;
 
     protected final Date timestamp;
     protected int changes;
@@ -45,7 +45,7 @@ public class State implements Serializable {
         this.light = light;
         this.inPocket = inPocket;
         this.inCallState = inCallState;
-        this.location = location;
+        this.location = SimpleLocation.fromLocation(location);
         this.timestamp = timestamp;
     }
 
@@ -89,7 +89,7 @@ public class State implements Serializable {
         return changes;
     }
 
-    public Location getLocation() {
+    public SimpleLocation getLocation() {
         return location;
     }
 }

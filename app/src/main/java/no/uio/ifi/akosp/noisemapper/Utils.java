@@ -56,6 +56,8 @@ public class Utils {
             JSONObject location = new JSONObject();
                 location.put("lat", state.getLocation().getLatitude());
                 location.put("lon", state.getLocation().getLongitude());
+                if (state.getLocation().hasSpeed()) { location.put("speed", state.getLocation().getSpeed()); }
+                if (state.getLocation().hasBearing()) { location.put("bearing", state.getLocation().getBearing()); }
             root.put("location", location);
 
             root.put("proximity", state.getProximity());

@@ -8,12 +8,16 @@ import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Locale;
 
@@ -53,6 +57,7 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
 
     protected State state;
     protected boolean ready = false;
+    private GoogleMap map;
 
     public void setState(State state) {
         this.state = state;
@@ -63,6 +68,9 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.bind(this, getRootView());
+        Log.i(TAG, "Asking for map");
+        phoneLocationView.onCreate(null);
+        phoneLocationView.getMapAsync(this);
         ready = true;
     }
 
@@ -95,7 +103,33 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
                 break;
         }
 
-        phoneLocationView.getMapAsync(this);
+        if (map != null) {
+            map.clear();
+            final LatLng currLoc = new LatLng(state.getLocation().getLatitude(),
+                    state.getLocation().getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 14));
+            map.addMarker(new MarkerOptions().position(currLoc));
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        Log.i(TAG, "OnMapReady called");
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "No permission to display my location!");
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        this.map = map;
+        this.map.setMyLocationEnabled(true);
     }
 
     public PhoneStatusView(Context context) {
@@ -145,22 +179,6 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
 
         this.state = ss.stateToSave;
         updateViews();
-    }
-
-    @Override
-    public void onMapReady(GoogleMap map) {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        map.setMyLocationEnabled(true);
     }
 
     static class SavedState extends BaseSavedState {
