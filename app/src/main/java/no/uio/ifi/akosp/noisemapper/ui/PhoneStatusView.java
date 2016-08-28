@@ -60,6 +60,7 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
     private GoogleMap map;
 
     public void setState(State state) {
+        Log.d(TAG, "Got state: " + state);
         this.state = state;
         updateViews();
     }

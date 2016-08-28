@@ -98,6 +98,8 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
         }
     }
 
+
+    protected boolean phoneStateServiceConnected = false;
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection psConnection = new ServiceConnection() {
 
@@ -108,6 +110,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             PhoneStateService.PSSBinder binder = (PhoneStateService.PSSBinder) service;
             PhoneStateService psService = binder.getService();
+            phoneStateServiceConnected = true;
 
             psService.requestPhoneState(SnippetRecorderService.this);
         }
@@ -151,7 +154,13 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
         }
 
         Log.i(TAG, "Work is done, stopping service.");
-        unbindService(psConnection);
+        if (phoneStateServiceConnected) {
+            try {
+                unbindService(psConnection);
+            } catch (Exception e) {
+                Log.w(TAG, "Cannot unbind from phoneStateService", e);
+            }
+        }
         SnippetRecorderService.this.stopSelf();
     }
 
@@ -162,7 +171,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
         recorder = new MediaRecorder();
 
 
-        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         outFile = getOutFile();
         recorder.setOutputFile(outFile.getPath());
@@ -170,15 +179,12 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
 
         try {
             recorder.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "prepare() failed");
-        }
-
-        try {
             recorder.start(); // TODO error code: -38 (something else is using mic?)
             isRecording = true;
         } catch (IllegalStateException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            Log.e(TAG, "prepare() failed");
         }
 
         if (isRecording) {

@@ -92,4 +92,24 @@ public class State implements Serializable {
     public SimpleLocation getLocation() {
         return location;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("PhoneState[");
+
+            sb.append("(orientation=").append(orientation.toString()).append(")");
+            sb.append("(proximity=")
+                    .append(String.format(Locale.US, "%s (%.1f cm)", getProximityText(), proximity))
+                    .append(")");
+            sb.append("(light=").append(String.format(Locale.US, "%.2f lux", light)).append(")");
+            sb.append("(inPocket=").append(inPocket).append(")");
+            sb.append("(inCallState=").append(inCallState.toString()).append(")");
+            sb.append("(location=").append(location.toString()).append(")");
+
+        sb.append("]");
+
+        return sb.toString();
+    }
 }

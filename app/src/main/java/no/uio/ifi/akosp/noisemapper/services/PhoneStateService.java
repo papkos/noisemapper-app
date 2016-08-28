@@ -63,6 +63,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected InCallState inCallState = InCallState.NO_CALL;
 
     protected boolean[] dataAvailable = new boolean[5];
+    private Object dataAvailableLock = new Object();
 
     protected SensorEventListener orientationListener = new SensorEventListener() {
         /* Based on http://www.codingforandroid.com/2011/01/using-orientation-sensors-simple.html */
@@ -80,7 +81,9 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
                     float values[] = new float[3];
                     SensorManager.getOrientation(R, values);
                     orientation = new Orientation(values[0], values[1], values[2]);
+                    Log.d(TAG, "Incoming orientation sensor reading");
                     dataAvailable(0);
+                    sensorManager.unregisterListener(this);
                 }
             }
         }
@@ -94,8 +97,10 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+                Log.d(TAG, "Incoming proximity sensor reading");
                 proximity = event.values[0];
                 dataAvailable(1);
+                sensorManager.unregisterListener(this);
             }
         }
 
@@ -110,6 +115,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
                 light = event.values[0];
                 dataAvailable(2);
+                sensorManager.unregisterListener(this);
             }
         }
 
@@ -173,13 +179,19 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     }
 
     protected void dataAvailable(int dataType) {
-        dataAvailable[dataType] = true;
+        synchronized (dataAvailableLock) {
+            dataAvailable[dataType] = true;
 
-        for (boolean b : dataAvailable) {
-            if (!b) {
-                return;
+            for (boolean b : dataAvailable) {
+                if (!b) {
+                    return;
+                }
             }
+            // All good, reset values for the next round
+            dataAvailable = new boolean[5];
+            registerSensors();
         }
+
 
         State state = new State(orientation, proximity, makeProximityText(proximity), light,
                 Utils.isInPocket(orientation, proximity, light), inCallState, location, new Date());
@@ -224,12 +236,16 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     private void registerEvents() {
         if (receiversRegistered) return;
 
-        sensorManager.registerListener(orientationListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(orientationListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_UI);
+        registerSensors();
         registerReceiver(callStateListener, new IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED));
         receiversRegistered = true;
+    }
+
+    private void registerSensors() {
+        sensorManager.registerListener(orientationListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(orientationListener, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void unregisterFromEvents() {
