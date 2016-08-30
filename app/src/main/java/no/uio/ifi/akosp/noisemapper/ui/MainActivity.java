@@ -15,8 +15,9 @@ import android.widget.Button;
 import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.model.State;
+import no.uio.ifi.akosp.noisemapper.services.ListenerService;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
-import no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService;
+import no.uio.ifi.akosp.noisemapper.services.Recorder;
 
 public class MainActivity extends AppCompatActivity implements PhoneStateService.PhoneStateRequestListener, AppStatusView.AppStatusViewInteractionListener {
 
@@ -72,14 +73,13 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         phoneStatusView = (PhoneStatusView) findViewById(R.id.phoneStatusView);
         appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
         appStatusView.setCallback(this);
-        appStatusView.setSoundServiceEnabled(app.isRecurringServiceEnabled(SnippetRecorderService.SERVICE_ID));
+        appStatusView.setSoundServiceEnabled(app.isRecurringServiceEnabled(ListenerService.SERVICE_ID));
 
         Button oneOff = (Button) findViewById(R.id.oneOff);
-        //noinspection ConstantConditions
         oneOff.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                SnippetRecorderService.startOneOff(MainActivity.this);
+            public void onClick(View view) {
+                new Thread(new Recorder(MainActivity.this, 10*1000)).start();
             }
         });
     }
@@ -108,10 +108,11 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
 
     @Override
     public void onSoundServiceSwitchChanged(boolean checked) {
-        app.setServiceEnabled(SnippetRecorderService.SERVICE_ID, checked);
-        startService(SnippetRecorderService.makeCheckIntent(
-                new ComponentName(this, SnippetRecorderService.class),
-                SnippetRecorderService.ACTION_START_SNIPPET
-        ));
+        app.setServiceEnabled(ListenerService.SERVICE_ID, checked);
+        if (checked) {
+            ListenerService.startListening(this, null, null);
+        } else {
+            ListenerService.stopListening(this, null, null);
+        }
     }
 }
