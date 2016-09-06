@@ -4,15 +4,23 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import no.uio.ifi.akosp.noisemapper.R;
+import no.uio.ifi.akosp.noisemapper.processors.CopyToPublicProcessor;
 import no.uio.ifi.akosp.noisemapper.ui.MainActivity;
 
 /**
@@ -39,6 +47,12 @@ public class ListenerService extends Service {
             handler.postDelayed(recurringRecorderRunnable, 10 * 1000);
         }
     };
+    private BroadcastReceiver copyToPublicProcessor;
+    @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
+    private List<BroadcastReceiver> signalProcessors = new ArrayList<BroadcastReceiver>(
+            Arrays.asList(
+                    new CopyToPublicProcessor()
+            ));
 
 //    // TODO: Rename parameters
 //    private static final String EXTRA_PARAM1 = "ListenerService::PARAM1";
@@ -119,17 +133,32 @@ public class ListenerService extends Service {
         Log.d(TAG, "Notification for foreground: " + notification);
         startForeground(42, notification);
 
+        final LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(getApplicationContext());
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Signals.ACTION_BEFORE_RECORDING_START);
+        filter.addAction(Signals.ACTION_RECORDING_STARTED);
+        filter.addAction(Signals.ACTION_RECORDING_STOPPED);
+        filter.addAction(Signals.ACTION_START_RECORDING_FAILED);
+        for (BroadcastReceiver receiver : signalProcessors) {
+            lbm.registerReceiver(receiver, filter);
+        }
+
         handler.post(recurringRecorderRunnable);
 
 
     }
 
-    private void handleStopListening() {
+    protected void handleStopListening() {
 
         stopForeground(true);
 
         handler.removeCallbacks(recurringRecorderRunnable);
         Log.i(TAG, "Removed handler callbacks, stopping service");
+
+        final LocalBroadcastManager lmb = LocalBroadcastManager.getInstance(getApplicationContext());
+        for (BroadcastReceiver receiver : signalProcessors) {
+            lmb.unregisterReceiver(receiver);
+        }
 
         stopSelf();
     }

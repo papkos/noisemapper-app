@@ -2,7 +2,6 @@ package no.uio.ifi.akosp.noisemapper.services;
 
 import android.content.Context;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.util.Log;
 
 import java.io.File;
@@ -35,9 +34,7 @@ public class Recorder implements Runnable {
     @Override
     public void run() {
         // Send signal `BeforeRecordingStart`
-        final Bundle beforeArgs = new Bundle();
-        beforeArgs.putInt("duration", durationMs);
-        Signals.sendBeforeRecordingStart(context, beforeArgs);
+        Signals.sendBeforeRecordingStart(context, durationMs);
 
         recorder = new MediaRecorder();
 
@@ -67,12 +64,12 @@ public class Recorder implements Runnable {
         }
 
         if (!isRecording) {
-            Signals.sendStartRecordingFailed(context, new Bundle());
+            Signals.sendStartRecordingFailed(context);
             return;
         }
 
         // Send signal `RecordingStarted`
-        Signals.sendRecordingStarted(context, new Bundle());
+        Signals.sendRecordingStarted(context, outFile, durationMs);
 
         long startTime = System.currentTimeMillis();
         long elapsedTime = System.currentTimeMillis() - startTime;
@@ -99,10 +96,7 @@ public class Recorder implements Runnable {
         }
 
         // Send signal: `RecordingStopped`
-        final Bundle stoppedArgs = new Bundle();
-        stoppedArgs.putSerializable("file", outFile);
-        stoppedArgs.putLong("actualLength", elapsedTime);
-        Signals.sendRecordingStopped(context, stoppedArgs);
+        Signals.sendRecordingStopped(context, outFile, (int) elapsedTime);
 
         // End of thread execution
     }
