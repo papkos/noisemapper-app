@@ -8,8 +8,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -39,12 +41,15 @@ public class ListenerService extends Service {
     private static final String ACTION_START_LISTENING = "ListenerService::StartListening";
     private static final String ACTION_STOP_LISTENING = "ListenerService::StopListening";
 
+    private volatile int recordingDurationMs = 5000;
+    private volatile int repeatIntervalSec = 10;
+
     private final Handler handler;
     private Runnable recurringRecorderRunnable = new Runnable() {
         @Override
         public void run() {
-            new Thread(new Recorder(getApplicationContext(), 5000)).start();
-            handler.postDelayed(recurringRecorderRunnable, 10 * 1000);
+            new Thread(new Recorder(getApplicationContext(), recordingDurationMs)).start();
+            handler.postDelayed(recurringRecorderRunnable, repeatIntervalSec * 1000);
         }
     };
     private BroadcastReceiver copyToPublicProcessor;
@@ -53,6 +58,28 @@ public class ListenerService extends Service {
             Arrays.asList(
                     new CopyToPublicProcessor()
             ));
+
+    private SharedPreferences.OnSharedPreferenceChangeListener timingPrefsChanged = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            Log.d(TAG, String.format("Preference %s changed", key));
+            if (! ("repeat_interval".equals(key) || "record_duration".equals(key))) {
+                return;
+            }
+
+            handler.removeCallbacks(recurringRecorderRunnable);
+
+            // Necessary to parse, as EditTextPreference always stores Strings.
+            recordingDurationMs = Integer.parseInt(sharedPreferences.getString("record_duration", "5")) * 1000;
+            repeatIntervalSec = Integer.parseInt(sharedPreferences.getString("repeat_interval", "60"));
+
+            Log.d(TAG, String.format("Preferences changed. New values are " +
+                    "repeat_interval=%d s, record_duration=%d ms",
+                    repeatIntervalSec, recordingDurationMs));
+
+            handler.post(recurringRecorderRunnable);
+        }
+    };
 
 //    // TODO: Rename parameters
 //    private static final String EXTRA_PARAM1 = "ListenerService::PARAM1";
@@ -143,6 +170,9 @@ public class ListenerService extends Service {
             lbm.registerReceiver(receiver, filter);
         }
 
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .registerOnSharedPreferenceChangeListener(timingPrefsChanged);
+
         handler.post(recurringRecorderRunnable);
 
 
@@ -159,6 +189,9 @@ public class ListenerService extends Service {
         for (BroadcastReceiver receiver : signalProcessors) {
             lmb.unregisterReceiver(receiver);
         }
+
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .unregisterOnSharedPreferenceChangeListener(timingPrefsChanged);
 
         stopSelf();
     }

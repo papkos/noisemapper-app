@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 
-import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.services.Signals;
 
@@ -50,7 +50,7 @@ public class CopyToPublicProcessor extends BroadcastReceiver {
     }
 
     private File getOutFolder(Context context) {
-        final SharedPreferences preferences = context.getSharedPreferences(context.getString(R.string.preferences_file), Context.MODE_PRIVATE);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String folderName = preferences.getString("outFolder", "NoiseMapper");
 
         String extDir =  Environment.getExternalStorageDirectory().getAbsolutePath();
