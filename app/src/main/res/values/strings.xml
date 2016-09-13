@@ -9,5 +9,7 @@
     <string name="pref_header_general">General</string>
     <string name="pref_title_repeat_interval">Repeat interval (sec)</string>
     <string name="pref_title_record_duration">Record duration (sec)</string>
+    <string name="notification_ongoing_title">NoiseMapper is measuring noise pollution</string>
+    <string name="notification_ongoing_content">Noise pollution measurement is in progress. Tap here to review settings, and turn it off.</string>
 
 </resources>

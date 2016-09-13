@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -69,9 +70,7 @@ public class ListenerService extends Service {
 
             handler.removeCallbacks(recurringRecorderRunnable);
 
-            // Necessary to parse, as EditTextPreference always stores Strings.
-            recordingDurationMs = Integer.parseInt(sharedPreferences.getString("record_duration", "5")) * 1000;
-            repeatIntervalSec = Integer.parseInt(sharedPreferences.getString("repeat_interval", "60"));
+            initializeTimingValuesFromPreferences(sharedPreferences);
 
             Log.d(TAG, String.format("Preferences changed. New values are " +
                     "repeat_interval=%d s, record_duration=%d ms",
@@ -80,6 +79,13 @@ public class ListenerService extends Service {
             handler.post(recurringRecorderRunnable);
         }
     };
+    private PowerManager.WakeLock wakeLock;
+
+    private void initializeTimingValuesFromPreferences(SharedPreferences sharedPreferences) {
+        // Necessary to parse, as EditTextPreference always stores Strings.
+        recordingDurationMs = Integer.parseInt(sharedPreferences.getString("record_duration", "5")) * 1000;
+        repeatIntervalSec = Integer.parseInt(sharedPreferences.getString("repeat_interval", "60"));
+    }
 
 //    // TODO: Rename parameters
 //    private static final String EXTRA_PARAM1 = "ListenerService::PARAM1";
@@ -149,8 +155,8 @@ public class ListenerService extends Service {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello World!");
+                        .setContentTitle(getString(R.string.notification_ongoing_title))
+                        .setContentText(getString(R.string.notification_ongoing_content));
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MainActivity.class);
@@ -173,12 +179,20 @@ public class ListenerService extends Service {
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
                 .registerOnSharedPreferenceChangeListener(timingPrefsChanged);
 
+        initializeTimingValuesFromPreferences(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+
         handler.post(recurringRecorderRunnable);
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NoiseMapper::ListenerService.wakeLock");
+        wakeLock.acquire();
 
 
     }
 
     protected void handleStopListening() {
+
+        wakeLock.release();
 
         stopForeground(true);
 
