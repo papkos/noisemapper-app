@@ -36,7 +36,16 @@
 
         <service
             android:name=".services.ListenerService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="no.uio.ifi.akosp.noisemapper.ui.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
