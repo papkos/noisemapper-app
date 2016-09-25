@@ -2,10 +2,7 @@ package no.uio.ifi.akosp.noisemapper.services;
 
 import android.Manifest;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -63,7 +60,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected InCallState inCallState = InCallState.NO_CALL;
 
     protected boolean[] dataAvailable = new boolean[5];
-    private Object dataAvailableLock = new Object();
+    private final Object dataAvailableLock = new Object();
 
     protected SensorEventListener orientationListener = new SensorEventListener() {
         /* Based on http://www.codingforandroid.com/2011/01/using-orientation-sensors-simple.html */
@@ -84,6 +81,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
                     Log.d(TAG, "Incoming orientation sensor reading");
                     dataAvailable(0);
                     sensorManager.unregisterListener(this);
+                } else {
+                    Log.w(TAG, "SensorManager.getRotationMatrix() unsuccessful.");
                 }
             }
         }
@@ -124,22 +123,28 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         }
     };
 
-    protected BroadcastReceiver callStateListener = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(intent.getAction())) {
-                String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-                if (TelephonyManager.EXTRA_STATE_RINGING.equals(state)) {
-                    inCallState = InCallState.RINGING;
-                } else if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state)) {
-                    inCallState = InCallState.IN_CALL;
-                } else {
-                    inCallState = InCallState.NO_CALL;
-                }
-                dataAvailable(3);
-            }
+    protected void fetchPhoneState() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        int state = telephonyManager.getCallState();
+        handlePhoneState(state);
+    }
+
+    /**
+     * When explicitly polling the the {@link TelephonyManager} using
+     * {@link TelephonyManager#getCallState()}
+     * @param state A {@link TelephonyManager} call state.
+     */
+    protected void handlePhoneState(int state) {
+        if (TelephonyManager.CALL_STATE_RINGING == state) {
+            inCallState = InCallState.RINGING;
+        } else if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
+            inCallState = InCallState.IN_CALL;
+        } else {
+            inCallState = InCallState.NO_CALL;
         }
-    };
+        dataAvailable(3);
+    }
+
     private List<PhoneStateRequestListener> listeners =
             Collections.synchronizedList(new ArrayList<PhoneStateRequestListener>());
 
@@ -155,17 +160,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
-
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        int state = telephonyManager.getCallState();
-        if (TelephonyManager.CALL_STATE_RINGING == state) {
-            inCallState = InCallState.RINGING;
-        } else if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
-            inCallState = InCallState.IN_CALL;
-        } else {
-            inCallState = InCallState.NO_CALL;
-        }
-        dataAvailable[3] = true;
+        fetchPhoneState();
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -175,7 +170,6 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
                     .addApi(LocationServices.API)
                     .build();
         }
-        mGoogleApiClient.connect();
     }
 
     protected void dataAvailable(int dataType) {
@@ -189,7 +183,6 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             }
             // All good, reset values for the next round
             dataAvailable = new boolean[5];
-            registerSensors();
         }
 
 
@@ -237,7 +230,14 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         if (receiversRegistered) return;
 
         registerSensors();
-        registerReceiver(callStateListener, new IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED));
+        fetchPhoneState();
+        if (mGoogleApiClient.isConnected()) {
+            fetchLocation();
+        } else if (mGoogleApiClient.isConnecting()) {
+            /* nothing to do here, wait for successful connection */
+        }else {
+            mGoogleApiClient.connect();
+        }
         receiversRegistered = true;
     }
 
@@ -254,12 +254,15 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         sensorManager.unregisterListener(orientationListener);
         sensorManager.unregisterListener(proximityListener);
         sensorManager.unregisterListener(lightSensorListener);
-        unregisterReceiver(callStateListener);
         receiversRegistered = false;
     }
 
     @Override
     public void onConnected(@Nullable Bundle connectionHint) {
+        fetchLocation();
+    }
+
+    protected void fetchLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
