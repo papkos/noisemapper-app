@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
 
         appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
         appStatusView.setCallback(this);
-        appStatusView.setSoundServiceEnabled(app.isRecurringServiceEnabled(ListenerService.SERVICE_ID));
+        appStatusView.setSoundServiceEnabled(app.isServiceEnabled(ListenerService.SERVICE_ID));
 
         Button oneOff = (Button) findViewById(R.id.oneOff);
         oneOff.setOnClickListener(new View.OnClickListener() {

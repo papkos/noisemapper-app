@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import no.uio.ifi.akosp.noisemapper.model.DaoMaster;
 import no.uio.ifi.akosp.noisemapper.model.DaoSession;
@@ -28,6 +30,9 @@ import no.uio.ifi.akosp.noisemapper.model.State;
 public class Utils {
 
     public static final String TAG = "Utils";
+
+    public static final SimpleDateFormat FILENAME_FORMATTER
+            = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
 
     public static boolean isInPocket(State state) {
         return isInPocket(state.getOrientation(), state.getProximity(), state.getLight());

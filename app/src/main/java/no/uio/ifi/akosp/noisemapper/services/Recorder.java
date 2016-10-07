@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
-import static no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService.FILENAME_FORMATTER;
+import no.uio.ifi.akosp.noisemapper.Utils;
+
 
 /**
  * Created on 2016.08.28..
@@ -105,7 +106,7 @@ public class Recorder implements Runnable {
     }
 
     private File getOutFile() {
-        final String filename = "record_" + FILENAME_FORMATTER.format(new Date()) + ".3gp";
+        final String filename = "record_" + Utils.FILENAME_FORMATTER.format(new Date()) + ".3gp";
         return new File(context.getCacheDir(), filename);
     }
 }

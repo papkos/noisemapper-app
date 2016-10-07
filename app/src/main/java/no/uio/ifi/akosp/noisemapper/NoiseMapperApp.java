@@ -8,15 +8,12 @@ import android.util.Log;
 
 import java.io.File;
 
-import no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService;
-
 /**
  * Created on 2016.04.17..
  *
  * @author Ákos Pap
  */
-public class NoiseMapperApp extends Application
-        implements SnippetRecorderService.SnippetRecorderApp {
+public class NoiseMapperApp extends Application {
 
     public static final String TAG = "NoiseMapperApp";
 
@@ -37,18 +34,7 @@ public class NoiseMapperApp extends Application
         logFile = new File(outFolder, "__states.json");
     }
 
-    @Override
-    public File getOutFolder() {
-        return outFolder;
-    }
-
-    @Override
-    public File getLogFile() {
-        return logFile;
-    }
-
-    @Override
-    public boolean isRecurringServiceEnabled(String serviceId) {
+    public boolean isServiceEnabled(String serviceId) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         return preferences.getBoolean(PREF_SERVICE_ENABLED + serviceId, false);
     }
