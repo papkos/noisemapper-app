@@ -22,7 +22,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Record one snippet with state"
+            android:text="Process"
             android:id="@+id/oneOff"
             android:layout_gravity="center_horizontal" />
 

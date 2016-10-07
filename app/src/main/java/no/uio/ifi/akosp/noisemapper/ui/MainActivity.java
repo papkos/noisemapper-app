@@ -19,10 +19,13 @@ import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
+import no.uio.ifi.akosp.noisemapper.Utils;
+import no.uio.ifi.akosp.noisemapper.model.DaoSession;
+import no.uio.ifi.akosp.noisemapper.model.Record;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.ListenerService;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
-import no.uio.ifi.akosp.noisemapper.services.Recorder;
+import no.uio.ifi.akosp.noisemapper.services.ProcessorService;
 
 public class MainActivity extends AppCompatActivity
         implements PhoneStateService.PhoneStateRequestListener,
@@ -90,7 +93,9 @@ public class MainActivity extends AppCompatActivity
         oneOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Recorder(MainActivity.this, null, 10*1000)).start();
+                DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
+                Record record = daoSession.getRecordDao().queryBuilder().limit(1).unique();
+                ProcessorService.startProcessingOne(getApplicationContext(), record.getId());
             }
         });
     }

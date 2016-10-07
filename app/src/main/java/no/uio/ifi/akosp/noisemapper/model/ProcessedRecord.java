@@ -10,12 +10,13 @@ import org.greenrobot.greendao.annotation.ToOne;
 import java.util.Date;
 
 /**
- * Created on 2016.09.25..
+ * Created on 2016.10.07..
  *
  * @author Ákos Pap
  */
 @Entity
-public class Record {
+public class ProcessedRecord {
+
     @Id(autoincrement = true)
     protected Long id;
 
@@ -25,28 +26,29 @@ public class Record {
     @ToOne
     protected State state;
 
-    protected String filename;
+    protected boolean uploaded = false;
 
-    protected boolean processed = false;
+    protected String processResult;
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
-    @Generated(hash = 765166123)
-    private transient RecordDao myDao;
+    @Generated(hash = 1576352220)
+    private transient ProcessedRecordDao myDao;
 
-    @Generated(hash = 1472837488)
-    public Record(Long id, @NotNull Date timestamp, String filename, boolean processed) {
+    @Generated(hash = 495264241)
+    public ProcessedRecord(Long id, @NotNull Date timestamp, boolean uploaded,
+            String processResult) {
         this.id = id;
         this.timestamp = timestamp;
-        this.filename = filename;
-        this.processed = processed;
+        this.uploaded = uploaded;
+        this.processResult = processResult;
     }
 
-    @Generated(hash = 477726293)
-    public Record() {
+    @Generated(hash = 1288854789)
+    public ProcessedRecord() {
     }
 
     public Long getId() {
@@ -65,12 +67,20 @@ public class Record {
         this.timestamp = timestamp;
     }
 
-    public String getFilename() {
-        return this.filename;
+    public boolean getUploaded() {
+        return this.uploaded;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setUploaded(boolean uploaded) {
+        this.uploaded = uploaded;
+    }
+
+    public String getProcessResult() {
+        return this.processResult;
+    }
+
+    public void setProcessResult(String processResult) {
+        this.processResult = processResult;
     }
 
     @Generated(hash = 2121903627)
@@ -141,18 +151,10 @@ public class Record {
         myDao.update(this);
     }
 
-    public boolean getProcessed() {
-        return this.processed;
-    }
-
-    public void setProcessed(boolean processed) {
-        this.processed = processed;
-    }
-
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 1505145191)
+    @Generated(hash = 1877917022)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getRecordDao() : null;
+        myDao = daoSession != null ? daoSession.getProcessedRecordDao() : null;
     }
 }
