@@ -24,7 +24,10 @@ import no.uio.ifi.akosp.noisemapper.services.ListenerService;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
 import no.uio.ifi.akosp.noisemapper.services.Recorder;
 
-public class MainActivity extends AppCompatActivity implements PhoneStateService.PhoneStateRequestListener, AppStatusView.AppStatusViewInteractionListener {
+public class MainActivity extends AppCompatActivity
+        implements PhoneStateService.PhoneStateRequestListener,
+                   AppStatusView.AppStatusViewInteractionListener,
+                   PhoneStatusView.PhoneStatusViewInteractionListener {
 
     public static final String TAG = "MainActivity";
 
@@ -76,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         app = (NoiseMapperApp) getApplication();
 
         phoneStatusView = (PhoneStatusView) findViewById(R.id.phoneStatusView);
+        phoneStatusView.setCallback(this);
+        phoneStatusView.setUpdateViewsEnabled(app.isUpdateViewsEnabled());
+
         appStatusView = (AppStatusView) findViewById(R.id.appStatusView);
         appStatusView.setCallback(this);
         appStatusView.setSoundServiceEnabled(app.isRecurringServiceEnabled(ListenerService.SERVICE_ID));
@@ -93,6 +99,12 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
+        if (app.isUpdateViewsEnabled()) {
+            bindToPSService();
+        }
+    }
+
+    private void bindToPSService() {
         Intent intent = new Intent(this, PhoneStateService.class);
         bindService(intent, psConnection, Context.BIND_AUTO_CREATE);
     }
@@ -100,7 +112,12 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
     @Override
     protected void onStop() {
         super.onStop();
+        unbindFromPSService();
+    }
+
+    private void unbindFromPSService() {
         if (psServiceBound) {
+            handler.removeCallbacks(requester);
             unbindService(psConnection);
             psServiceBound = false;
         }
@@ -118,6 +135,16 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
             ListenerService.startListening(this, null, null);
         } else {
             ListenerService.stopListening(this, null, null);
+        }
+    }
+
+    @Override
+    public void onUpdateViewSwitchChanged(boolean checked) {
+        app.setUpdateViewsEnabled(checked);
+        if (checked) {
+            bindToPSService();
+        } else {
+            unbindFromPSService();
         }
     }
 

@@ -10,6 +10,8 @@ import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,6 +38,12 @@ import no.uio.ifi.akosp.noisemapper.model.State;
 public class PhoneStatusView extends CardView implements OnMapReadyCallback {
 
     public static final String TAG = "PhoneStatusView";
+    public static final PhoneStatusViewInteractionListener DEFAULT_CALLBACK = new PhoneStatusViewInteractionListener() {
+        @Override
+        public void onUpdateViewSwitchChanged(boolean checked) {
+            Log.w(TAG, "Callback not registered!");
+        }
+    };
 
     @Bind(R.id.orientation)
     protected TextView orientationDisplay;
@@ -55,14 +63,30 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
     @Bind(R.id.phoneLocation)
     protected MapView phoneLocationView;
 
+    @Bind(R.id.updateViewSwitch)
+    protected Switch updateViewSwitch;
+
     protected State state;
     protected boolean ready = false;
     private GoogleMap map;
+
+    protected boolean updateViewsEnabled = false;
+
+    protected PhoneStatusViewInteractionListener callback = DEFAULT_CALLBACK;
 
     public void setState(State state) {
         Log.d(TAG, "Got state: " + state);
         this.state = state;
         updateViews();
+    }
+
+    public void setUpdateViewsEnabled(boolean enabled) {
+        this.updateViewsEnabled = enabled;
+        updateViews();
+    }
+
+    public void setCallback(PhoneStatusViewInteractionListener callback) {
+        this.callback = callback;
     }
 
     @Override
@@ -72,44 +96,56 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
         Log.i(TAG, "Asking for map");
         phoneLocationView.onCreate(null);
         phoneLocationView.getMapAsync(this);
+        updateViewSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                updateViewsEnabled = isChecked;
+                callback.onUpdateViewSwitchChanged(isChecked);
+            }
+        });
         ready = true;
     }
 
     protected void updateViews() {
         if (!ready) return;
 
-        final Orientation orientation = state.getOrientation();
-        orientationDisplay.setText(String.format(Locale.US, "X: %.0f° | Y: %.0f° | Z: %.0f°",
-                Math.toDegrees(orientation.pitch), Math.toDegrees(orientation.roll), Math.toDegrees(orientation.azimuth))
-        );
-        proximityDisplay.setText(String.format(Locale.US, "%s (%.1f cm)",
-                state.getProximityText(), state.getProximity())
-        );
-        lightSensorDisplay.setText(String.format(Locale.US, "%.2f lux", state.getLight()));
+        updateViewSwitch.setChecked(updateViewsEnabled);
 
-        isInPocketDisplay.setChecked(Utils.isInPocket(state));
+        if (state != null) {
 
-        switch (state.getInCallState()) {
-            case IN_CALL:
-                isInCallDisplay.setEnabled(true);
-                isInCallDisplay.setChecked(true);
-                break;
-            case RINGING:
-                isInCallDisplay.setEnabled(false);
-                isInCallDisplay.setChecked(true);
-                break;
-            case NO_CALL:
-                isInCallDisplay.setEnabled(true);
-                isInCallDisplay.setChecked(false);
-                break;
-        }
+            final Orientation orientation = state.getOrientation();
+            orientationDisplay.setText(String.format(Locale.US, "X: %.0f° | Y: %.0f° | Z: %.0f°",
+                    Math.toDegrees(orientation.pitch), Math.toDegrees(orientation.roll), Math.toDegrees(orientation.azimuth))
+            );
+            proximityDisplay.setText(String.format(Locale.US, "%s (%.1f cm)",
+                    state.getProximityText(), state.getProximity())
+            );
+            lightSensorDisplay.setText(String.format(Locale.US, "%.2f lux", state.getLight()));
 
-        if (map != null) {
-            map.clear();
-            final LatLng currLoc = new LatLng(state.getLocation().getLatitude(),
-                    state.getLocation().getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 14));
-            map.addMarker(new MarkerOptions().position(currLoc));
+            isInPocketDisplay.setChecked(Utils.isInPocket(state));
+
+            switch (state.getInCallState()) {
+                case IN_CALL:
+                    isInCallDisplay.setEnabled(true);
+                    isInCallDisplay.setChecked(true);
+                    break;
+                case RINGING:
+                    isInCallDisplay.setEnabled(false);
+                    isInCallDisplay.setChecked(true);
+                    break;
+                case NO_CALL:
+                    isInCallDisplay.setEnabled(true);
+                    isInCallDisplay.setChecked(false);
+                    break;
+            }
+
+            if (map != null) {
+                map.clear();
+                final LatLng currLoc = new LatLng(state.getLocation().getLatitude(),
+                        state.getLocation().getLongitude());
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 14));
+                map.addMarker(new MarkerOptions().position(currLoc));
+            }
         }
     }
 
@@ -210,5 +246,9 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
                         return new SavedState[size];
                     }
                 };
+    }
+
+    public interface PhoneStatusViewInteractionListener {
+        void onUpdateViewSwitchChanged(boolean checked);
     }
 }
