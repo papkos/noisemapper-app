@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.UUID;
+
 import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.model.State;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         public void run() {
             if (!psServiceBound) return;
 
-            psService.requestPhoneState(MainActivity.this);
+            psService.requestPhoneState(new PhoneStateService.PhoneStateRequest(MainActivity.this));
             handler.postDelayed(requester, 500);
         }
     };
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
         oneOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Recorder(MainActivity.this, 10*1000)).start();
+                new Thread(new Recorder(MainActivity.this, null, 10*1000)).start();
             }
         });
     }
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements PhoneStateService
     }
 
     @Override
-    public void onStateAvailable(State state) {
+    public void onStateAvailable(UUID uuid, State state) {
         phoneStatusView.setState(state);
     }
 

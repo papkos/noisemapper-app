@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.InCallState;
@@ -145,8 +146,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         dataAvailable(3);
     }
 
-    private List<PhoneStateRequestListener> listeners =
-            Collections.synchronizedList(new ArrayList<PhoneStateRequestListener>());
+    private List<PhoneStateRequest> requests =
+            Collections.synchronizedList(new ArrayList<PhoneStateRequest>());
 
     private GoogleApiClient mGoogleApiClient;
     private Location location;
@@ -189,16 +190,16 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         State state = new State(orientation, proximity, makeProximityText(proximity), light,
                 Utils.isInPocket(orientation, proximity, light), inCallState, location, new Date());
 
-        if (!listeners.isEmpty()) {
-            Iterator<PhoneStateRequestListener> it = listeners.iterator();
+        if (!requests.isEmpty()) {
+            Iterator<PhoneStateRequest> it = requests.iterator();
             while (it.hasNext()) {
-                PhoneStateRequestListener listener = it.next();
-                listener.onStateAvailable(state);
+                PhoneStateRequest request = it.next();
+                request.listener.onStateAvailable(request.uuid, state);
                 it.remove();
             }
         }
 
-        if (listeners.isEmpty()) {
+        if (requests.isEmpty()) {
             unregisterFromEvents();
         }
     }
@@ -207,8 +208,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         return (proximity < proximitySensor.getMaximumRange() ? "near" : "far");
     }
 
-    public void requestPhoneState(PhoneStateRequestListener listener) {
-        listeners.add(listener);
+    public void requestPhoneState(PhoneStateRequest request) {
+        requests.add(request);
         registerEvents();
     }
 
@@ -296,6 +297,29 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     }
 
     public interface PhoneStateRequestListener {
-        void onStateAvailable(State state);
+        void onStateAvailable(UUID uuid,  State state);
+    }
+
+    public static class PhoneStateRequest {
+        @Nullable
+        public final UUID uuid;
+        @NonNull
+        public final PhoneStateRequestListener listener;
+        @NonNull
+        public final Date timestamp;
+
+        public PhoneStateRequest(@NonNull PhoneStateRequestListener listener) {
+            this(null, listener, new Date());
+        }
+
+        public PhoneStateRequest(UUID uuid, @NonNull PhoneStateRequestListener listener) {
+            this(uuid, listener, new Date());
+        }
+
+        public PhoneStateRequest(@Nullable UUID uuid, @NonNull PhoneStateRequestListener listener, @NonNull Date timestamp) {
+            this.uuid = uuid;
+            this.listener = listener;
+            this.timestamp = timestamp;
+        }
     }
 }

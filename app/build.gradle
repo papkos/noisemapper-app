@@ -1,4 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.0'
+    }
+}
+
 apply plugin: 'com.android.application'
+
+apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 24
@@ -26,6 +37,10 @@ android {
     }
 }
 
+greendao {
+    schemaVersion 1
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -38,6 +53,7 @@ dependencies {
     compile 'com.android.support:cardview-v7:24.2.1'
 
     compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'org.greenrobot:greendao:3.2.0'
 
     testCompile 'junit:junit:4.12'
 }

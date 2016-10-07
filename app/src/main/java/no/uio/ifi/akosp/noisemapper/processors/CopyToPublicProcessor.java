@@ -38,10 +38,10 @@ public class CopyToPublicProcessor extends BroadcastReceiver {
                     Log.w(TAG, "Lost a file, cannot copy it to a safe place.", e);
                 }
 
-                if (file.canWrite()) {
-                    file.delete();
-                    Log.i(TAG, "Deleted old file: " + file);
-                }
+//                if (file.canWrite()) {
+//                    file.delete();
+//                    Log.i(TAG, "Deleted old file: " + file);
+//                }
 
             } else {
                 Log.w(TAG, "Lost a file, can't read it: " + file);

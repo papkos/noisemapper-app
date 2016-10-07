@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Created on 2016.08.28..
@@ -21,12 +22,14 @@ public class Signals {
     public static final String ACTION_RECORDING_STOPPED = "Signals::RecordingStopped";
     public static final String ACTION_START_RECORDING_FAILED = "Signals::StartRecordingFailed";
 
+    public static final String EXTRA_UUID = "Signals::uuid";
     public static final String EXTRA_DURATION_MS = "Signals::durationMs";
     public static final String EXTRA_FILE = "Signals::file";
 
-    public static void sendBeforeRecordingStart(Context context, int expectedDurationMs) {
+    public static void sendBeforeRecordingStart(Context context, UUID uuid, int expectedDurationMs) {
         Intent i = new Intent();
         i.setAction(ACTION_BEFORE_RECORDING_START);
+        i.putExtra(EXTRA_UUID, uuid);
         i.putExtra(EXTRA_DURATION_MS, expectedDurationMs);
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 
@@ -35,9 +38,10 @@ public class Signals {
                 i.getExtras().toString()));
     }
 
-    public static void sendRecordingStarted(Context context, File targetFile, int expectedDurationMs) {
+    public static void sendRecordingStarted(Context context, UUID uuid, File targetFile, int expectedDurationMs) {
         Intent i = new Intent();
         i.setAction(ACTION_RECORDING_STARTED);
+        i.putExtra(EXTRA_UUID, uuid);
         i.putExtra(EXTRA_FILE, targetFile);
         i.putExtra(EXTRA_DURATION_MS, expectedDurationMs);
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -47,9 +51,10 @@ public class Signals {
                 i.getExtras().toString()));
     }
 
-    public static void sendRecordingStopped(Context context, File file, int actualDuration) {
+    public static void sendRecordingStopped(Context context, UUID uuid, File file, int actualDuration) {
         Intent i = new Intent();
         i.setAction(ACTION_RECORDING_STOPPED);
+        i.putExtra(EXTRA_UUID, uuid);
         i.putExtra(EXTRA_FILE, file);
         i.putExtra(EXTRA_DURATION_MS, actualDuration);
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -59,9 +64,10 @@ public class Signals {
                 i.getExtras().toString()));
     }
 
-    public static void sendStartRecordingFailed(Context context) {
+    public static void sendStartRecordingFailed(Context context, UUID uuid) {
         Intent i = new Intent();
         i.setAction(ACTION_START_RECORDING_FAILED);
+        i.putExtra(EXTRA_UUID, uuid);
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 
         Log.i(TAG, String.format(Locale.getDefault(),

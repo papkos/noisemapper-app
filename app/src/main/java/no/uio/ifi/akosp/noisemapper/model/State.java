@@ -2,19 +2,31 @@ package no.uio.ifi.akosp.noisemapper.model;
 
 import android.location.Location;
 
+import org.greenrobot.greendao.annotation.Convert;
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import no.uio.ifi.akosp.noisemapper.model.converters.InCallStateConverter;
+import no.uio.ifi.akosp.noisemapper.model.converters.OrientationConverter;
+import no.uio.ifi.akosp.noisemapper.model.converters.SimpleLocationConverter;
 
 /**
  * Created on 2016.03.30..
  *
  * @author Ákos Pap
  */
+@Entity
 public class State implements Serializable {
 
-    @SuppressWarnings("PointlessBitwiseExpression")
+    static final long serialVersionUID = 1L;
+
+//    @SuppressWarnings("PointlessBitwiseExpression")
     public static final int CHANGE_PROXIMITY = 1 << 0;
     public static final int CHANGE_LIGHT = 1 << 1;
     public static final int CHANGE_AZIMUTH = 1 << 2;
@@ -25,18 +37,26 @@ public class State implements Serializable {
 
     public static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy. MM. dd. HH:mm.ss", Locale.US);
 
-    protected final Orientation orientation;
-    protected final float proximity;
-    protected final String proximityText;
-    protected final float light;
+    @Id
+    protected Long id;
 
-    protected final boolean inPocket;
-    protected final InCallState inCallState;
+    @Convert(converter = OrientationConverter.class, columnType = String.class)
+    protected Orientation orientation;
+    protected float proximity;
+    protected String proximityText;
+    protected float light;
 
-    protected final SimpleLocation location;
+    protected boolean inPocket;
+    @Convert(converter = InCallStateConverter.class, columnType = String.class)
+    protected InCallState inCallState;
 
-    protected final Date timestamp;
-    protected int changes;
+    @Convert(converter = SimpleLocationConverter.class, columnType = String.class)
+    protected SimpleLocation location;
+
+    protected Date timestamp;
+    protected transient int changes;
+
+    public State() {}
 
     public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, Date timestamp) {
         this.orientation = position;
@@ -46,6 +66,20 @@ public class State implements Serializable {
         this.inPocket = inPocket;
         this.inCallState = inCallState;
         this.location = SimpleLocation.fromLocation(location);
+        this.timestamp = timestamp;
+    }
+
+    @Generated(hash = 732673001)
+    public State(Long id, Orientation orientation, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, SimpleLocation location,
+            Date timestamp) {
+        this.id = id;
+        this.orientation = orientation;
+        this.proximity = proximity;
+        this.proximityText = proximityText;
+        this.light = light;
+        this.inPocket = inPocket;
+        this.inCallState = inCallState;
+        this.location = location;
         this.timestamp = timestamp;
     }
 
@@ -111,5 +145,49 @@ public class State implements Serializable {
         sb.append("]");
 
         return sb.toString();
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setOrientation(Orientation orientation) {
+        this.orientation = orientation;
+    }
+
+    public void setProximity(float proximity) {
+        this.proximity = proximity;
+    }
+
+    public void setProximityText(String proximityText) {
+        this.proximityText = proximityText;
+    }
+
+    public void setLight(float light) {
+        this.light = light;
+    }
+
+    public boolean getInPocket() {
+        return this.inPocket;
+    }
+
+    public void setInPocket(boolean inPocket) {
+        this.inPocket = inPocket;
+    }
+
+    public void setInCallState(InCallState inCallState) {
+        this.inCallState = inCallState;
+    }
+
+    public void setLocation(SimpleLocation location) {
+        this.location = location;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -57,6 +57,45 @@ public class SimpleLocation implements Serializable {
         return loc;
     }
 
+    public SimpleLocation() {}
+    
+    public SimpleLocation(double mLatitude,
+                          double mLongitude,
+                          boolean mHasAltitude,
+                          double mAltitude,
+                          boolean mHasSpeed,
+                          float mSpeed,
+                          boolean mHasBearing,
+                          float mBearing,
+                          boolean mHasAccuracy,
+                          float mAccuracy,
+                          String mProvider) {
+        this.mLatitude = mLatitude;
+        this.mLongitude = mLongitude;
+
+        if (mHasAltitude) {
+            this.mHasAltitude = true;
+            this.mAltitude = mAltitude;
+        }
+
+        if (mHasSpeed) {
+            this.mHasSpeed = true;
+            this.mSpeed = mSpeed;
+        }
+
+        if (mHasBearing) {
+            this.mHasBearing = true;
+            this.mBearing = mBearing;
+        }
+
+        if (mHasAccuracy) {
+            this.mHasAccuracy = true;
+            this.mAccuracy = mAccuracy;
+        }
+
+        this.mProvider = mProvider;
+    }
+
     public double getLatitude() {
         return mLatitude;
     }

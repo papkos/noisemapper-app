@@ -7,6 +7,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
 import static no.uio.ifi.akosp.noisemapper.services.SnippetRecorderService.FILENAME_FORMATTER;
 
@@ -20,21 +21,23 @@ public class Recorder implements Runnable {
     public static final String TAG = "Recorder";
 
     protected final Context context;
+    private final UUID uuid;
     protected final int durationMs;
 
     protected MediaRecorder recorder;
     protected volatile boolean isRecording = false;
     protected File outFile;
 
-    public Recorder(Context context, int duration) {
+    public Recorder(Context context, UUID uuid, int duration) {
         this.context = context;
+        this.uuid = uuid;
         this.durationMs = duration;
     }
 
     @Override
     public void run() {
         // Send signal `BeforeRecordingStart`
-        Signals.sendBeforeRecordingStart(context, durationMs);
+        Signals.sendBeforeRecordingStart(context, uuid, durationMs);
 
         recorder = new MediaRecorder();
 
@@ -64,12 +67,12 @@ public class Recorder implements Runnable {
         }
 
         if (!isRecording) {
-            Signals.sendStartRecordingFailed(context);
+            Signals.sendStartRecordingFailed(context, uuid);
             return;
         }
 
         // Send signal `RecordingStarted`
-        Signals.sendRecordingStarted(context, outFile, durationMs);
+        Signals.sendRecordingStarted(context, uuid, outFile, durationMs);
 
         long startTime = System.currentTimeMillis();
         long elapsedTime = System.currentTimeMillis() - startTime;
@@ -96,7 +99,7 @@ public class Recorder implements Runnable {
         }
 
         // Send signal: `RecordingStopped`
-        Signals.sendRecordingStopped(context, outFile, (int) elapsedTime);
+        Signals.sendRecordingStopped(context, uuid, outFile, (int) elapsedTime);
 
         // End of thread execution
     }

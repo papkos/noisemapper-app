@@ -1,8 +1,10 @@
 package no.uio.ifi.akosp.noisemapper;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.greenrobot.greendao.database.Database;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +14,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
+import no.uio.ifi.akosp.noisemapper.model.DaoMaster;
+import no.uio.ifi.akosp.noisemapper.model.DaoSession;
 import no.uio.ifi.akosp.noisemapper.model.Orientation;
+import no.uio.ifi.akosp.noisemapper.model.SimpleLocation;
 import no.uio.ifi.akosp.noisemapper.model.State;
 
 /**
@@ -44,26 +49,14 @@ public class Utils {
         );
     }
 
-    public static void sendRefreshBroadcast(Context context) {
-//        LocalBroadcastManager.getInstance(context)
-//                .sendBroadcast(RecordingListFragment.getRefreshIntent());
-    }
-
     public static String stateToJson(State state, String filename) {
         JSONObject root = new JSONObject();
 
         try {
-            JSONObject orientation = new JSONObject();
-                orientation.put("azimuth", state.getOrientation().azimuth);
-                orientation.put("pitch", state.getOrientation().pitch);
-                orientation.put("roll", state.getOrientation().roll);
+            JSONObject orientation = orientationToJson(state.getOrientation());
             root.put("orientation", orientation);
 
-            JSONObject location = new JSONObject();
-                location.put("lat", state.getLocation().getLatitude());
-                location.put("lon", state.getLocation().getLongitude());
-                if (state.getLocation().hasSpeed()) { location.put("speed", state.getLocation().getSpeed()); }
-                if (state.getLocation().hasBearing()) { location.put("bearing", state.getLocation().getBearing()); }
+            JSONObject location = simpleLocationToJson(state.getLocation());
             root.put("location", location);
 
             root.put("proximity", state.getProximity());
@@ -80,6 +73,71 @@ public class Utils {
         }
 
         return root.toString();
+    }
+
+    @NonNull
+    public static JSONObject orientationToJson(Orientation orientation) {
+        JSONObject ret = new JSONObject();
+        try {
+            ret.put("azimuth", orientation.azimuth);
+            ret.put("pitch", orientation.pitch);
+            ret.put("roll", orientation.roll);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    public static Orientation orientationFromJson(String json) {
+        JSONObject jo;
+        try {
+            jo = new JSONObject(json);
+            return new Orientation(
+                    (float) jo.getDouble("azimuth"),
+                    (float) jo.getDouble("pitch"),
+                    (float) jo.getDouble("roll")
+            );
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @NonNull
+    public static JSONObject simpleLocationToJson(SimpleLocation loc) {
+        JSONObject ret = new JSONObject();
+        try {
+            ret.put("lat", loc.getLatitude());
+            ret.put("lon", loc.getLongitude());
+            if (loc.hasSpeed()) { ret.put("speed", loc.getSpeed()); }
+            if (loc.hasBearing()) { ret.put("bearing", loc.getBearing()); }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    public static SimpleLocation simpleLocationFromJson(String json) {
+        JSONObject jo;
+        try {
+            jo = new JSONObject(json);
+            return new SimpleLocation(
+                    jo.getDouble("lon"),
+                    jo.getDouble("lat"),
+                    jo.has("altitude"),
+                    (float) (jo.has("altitude") ? jo.getDouble("altitude") : 0),
+                    jo.has("speed"),
+                    (float) (jo.has("speed") ? jo.getDouble("speed") : 0),
+                    jo.has("bearing"),
+                    (float) (jo.has("bearing") ? jo.getDouble("bearing") : 0),
+                    jo.has("accuracy"),
+                    (float) (jo.has("accuracy") ? jo.getDouble("accuracy") : 0),
+                    jo.getString("provider")
+            );
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -110,4 +168,18 @@ public class Utils {
             }
         }
     }
+
+    /* methods using a Context ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    public static void sendRefreshBroadcast(Context context) {
+//        LocalBroadcastManager.getInstance(context)
+//                .sendBroadcast(RecordingListFragment.getRefreshIntent());
+    }
+
+    public static DaoSession getDaoSession(Context context) {
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getString(R.string.databaseName));
+        Database db = helper.getWritableDb();
+        return new DaoMaster(db).newSession();
+    }
+
 }

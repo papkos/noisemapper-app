@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.State;
@@ -112,7 +113,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
             PhoneStateService psService = binder.getService();
             phoneStateServiceConnected = true;
 
-            psService.requestPhoneState(SnippetRecorderService.this);
+            psService.requestPhoneState(new PhoneStateService.PhoneStateRequest(SnippetRecorderService.this));
         }
 
         @Override
@@ -216,7 +217,7 @@ public class SnippetRecorderService extends RecurringService implements PhoneSta
     }
 
     @Override
-    public void onStateAvailable(State state) {
+    public void onStateAvailable(UUID uuid, State state) {
         this.state = state;
         doShutdownProtocol();
     }

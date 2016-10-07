@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="preferences_file" translatable="false">preferences</string>
+    <string name="databaseName" translatable="false">noisemapper-db</string>
+</resources>
