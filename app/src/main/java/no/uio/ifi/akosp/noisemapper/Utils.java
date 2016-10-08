@@ -54,7 +54,7 @@ public class Utils {
         );
     }
 
-    public static String stateToJson(State state, String filename) {
+    public static JSONObject stateToJson(State state) {
         JSONObject root = new JSONObject();
 
         try {
@@ -71,13 +71,11 @@ public class Utils {
             root.put("inCallState", state.getInCallState().name());
             root.put("timestamp", state.getTimestampString());
 
-            root.put("file", filename);
-
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize a state to JSON.", e);
         }
 
-        return root.toString();
+        return root;
     }
 
     @NonNull

@@ -95,9 +95,8 @@ public class ProcessorService extends IntentService {
     }
 
     private void processOneAndStore(Record record) {
-        String result = null;
         try {
-            result = process(record);
+            String result = process(record);
 
             record.setProcessed(true);
             daoSession.getRecordDao().save(record);

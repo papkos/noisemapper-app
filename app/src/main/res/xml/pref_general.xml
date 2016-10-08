@@ -18,4 +18,13 @@
         android:selectAllOnFocus="true"
         android:defaultValue="5" />
 
+    <EditTextPreference
+        android:key="host_url"
+        android:title="Host URL"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:inputType="textUri"
+        android:selectAllOnFocus="false"
+        android:defaultValue="@string/defaultHost" />
+
 </PreferenceScreen>
