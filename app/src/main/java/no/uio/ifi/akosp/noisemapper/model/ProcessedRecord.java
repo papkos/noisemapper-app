@@ -23,8 +23,9 @@ public class ProcessedRecord {
     @NotNull
     protected Date timestamp;
 
-    @ToOne
+    @ToOne(joinProperty = "stateId")
     protected State state;
+    protected Long stateId;
 
     protected boolean uploaded = false;
 
@@ -38,11 +39,12 @@ public class ProcessedRecord {
     @Generated(hash = 1576352220)
     private transient ProcessedRecordDao myDao;
 
-    @Generated(hash = 495264241)
-    public ProcessedRecord(Long id, @NotNull Date timestamp, boolean uploaded,
-            String processResult) {
+    @Generated(hash = 756768005)
+    public ProcessedRecord(Long id, @NotNull Date timestamp, Long stateId,
+            boolean uploaded, String processResult) {
         this.id = id;
         this.timestamp = timestamp;
+        this.stateId = stateId;
         this.uploaded = uploaded;
         this.processResult = processResult;
     }
@@ -67,6 +69,14 @@ public class ProcessedRecord {
         this.timestamp = timestamp;
     }
 
+    public Long getStateId() {
+        return this.stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+
     public boolean getUploaded() {
         return this.uploaded;
     }
@@ -83,35 +93,35 @@ public class ProcessedRecord {
         this.processResult = processResult;
     }
 
-    @Generated(hash = 2121903627)
-    private transient boolean state__refreshed;
+    @Generated(hash = 1617069713)
+    private transient Long state__resolvedKey;
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 1228378983)
+    @Generated(hash = 935789366)
     public State getState() {
-        if (state != null || !state__refreshed) {
+        Long __key = this.stateId;
+        if (state__resolvedKey == null || !state__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
             StateDao targetDao = daoSession.getStateDao();
-            targetDao.refresh(state);
-            state__refreshed = true;
+            State stateNew = targetDao.load(__key);
+            synchronized (this) {
+                state = stateNew;
+                state__resolvedKey = __key;
+            }
         }
         return state;
     }
 
-    /** To-one relationship, returned entity is not refreshed and may carry only the PK property. */
-    @Generated(hash = 1715569450)
-    public State peakState() {
-        return state;
-    }
-
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 646489265)
+    @Generated(hash = 597277186)
     public void setState(State state) {
         synchronized (this) {
             this.state = state;
-            state__refreshed = true;
+            stateId = state == null ? null : state.getId();
+            state__resolvedKey = stateId;
         }
     }
 
@@ -157,4 +167,6 @@ public class ProcessedRecord {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getProcessedRecordDao() : null;
     }
+
+
 }
