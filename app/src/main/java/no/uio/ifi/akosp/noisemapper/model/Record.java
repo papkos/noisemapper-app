@@ -22,8 +22,9 @@ public class Record {
     @NotNull
     protected Date timestamp;
 
-    @ToOne
+    @ToOne(joinProperty = "stateId")
     protected State state;
+    protected Long stateId;
 
     protected String filename;
 
@@ -37,10 +38,12 @@ public class Record {
     @Generated(hash = 765166123)
     private transient RecordDao myDao;
 
-    @Generated(hash = 1472837488)
-    public Record(Long id, @NotNull Date timestamp, String filename, boolean processed) {
+    @Generated(hash = 293258094)
+    public Record(Long id, @NotNull Date timestamp, Long stateId, String filename,
+            boolean processed) {
         this.id = id;
         this.timestamp = timestamp;
+        this.stateId = stateId;
         this.filename = filename;
         this.processed = processed;
     }
@@ -48,6 +51,9 @@ public class Record {
     @Generated(hash = 477726293)
     public Record() {
     }
+
+    @Generated(hash = 1617069713)
+    private transient Long state__resolvedKey;
 
     public Long getId() {
         return this.id;
@@ -73,35 +79,48 @@ public class Record {
         this.filename = filename;
     }
 
-    @Generated(hash = 2121903627)
-    private transient boolean state__refreshed;
+    public boolean getProcessed() {
+        return this.processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+
+    public Long getStateId() {
+        return this.stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 1228378983)
+    @Generated(hash = 935789366)
     public State getState() {
-        if (state != null || !state__refreshed) {
+        Long __key = this.stateId;
+        if (state__resolvedKey == null || !state__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
             StateDao targetDao = daoSession.getStateDao();
-            targetDao.refresh(state);
-            state__refreshed = true;
+            State stateNew = targetDao.load(__key);
+            synchronized (this) {
+                state = stateNew;
+                state__resolvedKey = __key;
+            }
         }
         return state;
     }
 
-    /** To-one relationship, returned entity is not refreshed and may carry only the PK property. */
-    @Generated(hash = 1715569450)
-    public State peakState() {
-        return state;
-    }
-
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 646489265)
+    @Generated(hash = 597277186)
     public void setState(State state) {
         synchronized (this) {
             this.state = state;
-            state__refreshed = true;
+            stateId = state == null ? null : state.getId();
+            state__resolvedKey = stateId;
         }
     }
 
@@ -141,18 +160,11 @@ public class Record {
         myDao.update(this);
     }
 
-    public boolean getProcessed() {
-        return this.processed;
-    }
-
-    public void setProcessed(boolean processed) {
-        this.processed = processed;
-    }
-
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1505145191)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getRecordDao() : null;
     }
+
 }

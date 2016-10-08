@@ -83,48 +83,8 @@ public class State implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public Orientation getOrientation() {
-        return orientation;
-    }
-
-    public float getProximity() {
-        return proximity;
-    }
-
-    public String getProximityText() {
-        return proximityText;
-    }
-
-    public float getLight() {
-        return light;
-    }
-
-    public boolean isInPocket() {
-        return inPocket;
-    }
-
-    public InCallState getInCallState() {
-        return inCallState;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
     public String getTimestampString() {
         return DATE_FORMATTER.format(timestamp);
-    }
-
-    public void setChanges(int changes) {
-        this.changes = changes;
-    }
-
-    public int getChanges() {
-        return changes;
-    }
-
-    public SimpleLocation getLocation() {
-        return location;
     }
 
     @Override
@@ -148,46 +108,87 @@ public class State implements Serializable {
     }
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
+    public Orientation getOrientation() {
+        return orientation;
+    }
+
     public void setOrientation(Orientation orientation) {
         this.orientation = orientation;
+    }
+
+    public float getProximity() {
+        return proximity;
     }
 
     public void setProximity(float proximity) {
         this.proximity = proximity;
     }
 
+    public String getProximityText() {
+        return proximityText;
+    }
+
     public void setProximityText(String proximityText) {
         this.proximityText = proximityText;
+    }
+
+    public float getLight() {
+        return light;
     }
 
     public void setLight(float light) {
         this.light = light;
     }
 
-    public boolean getInPocket() {
-        return this.inPocket;
+    public boolean isInPocket() {
+        return inPocket;
     }
 
     public void setInPocket(boolean inPocket) {
         this.inPocket = inPocket;
     }
 
+    public InCallState getInCallState() {
+        return inCallState;
+    }
+
     public void setInCallState(InCallState inCallState) {
         this.inCallState = inCallState;
+    }
+
+    public SimpleLocation getLocation() {
+        return location;
     }
 
     public void setLocation(SimpleLocation location) {
         this.location = location;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
+
+    public int getChanges() {
+        return changes;
+    }
+
+    public void setChanges(int changes) {
+        this.changes = changes;
+    }
+
+    public boolean getInPocket() {
+        return this.inPocket;
+    }
+
 }

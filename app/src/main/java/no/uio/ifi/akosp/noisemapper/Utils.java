@@ -114,8 +114,11 @@ public class Utils {
         try {
             ret.put("lat", loc.getLatitude());
             ret.put("lon", loc.getLongitude());
+            if (loc.hasAltitude()) { ret.put("altitude", loc.getAltitude()); }
             if (loc.hasSpeed()) { ret.put("speed", loc.getSpeed()); }
             if (loc.hasBearing()) { ret.put("bearing", loc.getBearing()); }
+            if (loc.hasAccuracy()) { ret.put("accuracy", loc.getAccuracy()); }
+            ret.put("provider", loc.getProvider());
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -120,6 +120,7 @@ public class ListenerService extends Service
             }
         }
     };
+    private DaoSession daoSession;
 
     private void initializeTimingValuesFromPreferences(SharedPreferences sharedPreferences) {
         // Necessary to parse, as EditTextPreference always stores Strings.
@@ -138,8 +139,16 @@ public class ListenerService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
+        daoSession = Utils.getDaoSession(getApplicationContext());
+
         Intent intent = new Intent(this, PhoneStateService.class);
         bindService(intent, psConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        daoSession.getDatabase().close();
     }
 
     /**
@@ -295,15 +304,22 @@ public class ListenerService extends Service
     }
 
     @Override
-    public void handleRecordingReady(UUID uuid, File file, State phoneState) {
-        Record record = new Record();
-        record.setFilename(file.getAbsolutePath());
-        record.setState(phoneState);
-        record.setTimestamp(new Date(file.lastModified()));
+    public void handleRecordingReady(UUID uuid, final File file, final State phoneState) {
+        daoSession.runInTx(new Runnable() {
+            @Override
+            public void run() {
+                daoSession.getStateDao().save(phoneState);
+                Log.i(TAG, String.format("Saved State with id=%s", phoneState.getId().toString()));
 
-        DaoSession session = Utils.getDaoSession(getApplicationContext());
-        session.getRecordDao().save(record);
-        Log.i(TAG, String.format("Saved record with id=%s", record.getId().toString()));
+                Record record = new Record();
+                record.setFilename(file.getAbsolutePath());
+                record.setTimestamp(new Date(file.lastModified()));
+                record.setState(phoneState);
+
+                daoSession.getRecordDao().save(record);
+                Log.i(TAG, String.format("Saved Record with id=%s", record.getId().toString()));
+            }
+        });
     }
 
 
