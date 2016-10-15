@@ -93,16 +93,18 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.bind(this, getRootView());
-        Log.i(TAG, "Asking for map");
-        phoneLocationView.onCreate(null);
-        phoneLocationView.getMapAsync(this);
-        updateViewSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                updateViewsEnabled = isChecked;
-                callback.onUpdateViewSwitchChanged(isChecked);
-            }
-        });
+        if (! isInEditMode()) {
+            Log.i(TAG, "Asking for map");
+            phoneLocationView.onCreate(null);
+            phoneLocationView.getMapAsync(this);
+            updateViewSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    updateViewsEnabled = isChecked;
+                    callback.onUpdateViewSwitchChanged(isChecked);
+                }
+            });
+        }
         ready = true;
     }
 

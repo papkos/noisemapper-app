@@ -10,10 +10,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,6 +40,7 @@ public class UploaderService extends IntentService {
     
     private DaoSession daoSession;
     private String host;
+    private static final String path = "/api/upload_recording/";
     
     public UploaderService() {
         super("UploaderService");
@@ -103,7 +104,7 @@ public class UploaderService extends IntentService {
     private void uploadOneAndStore(ProcessedRecord pr) {
         URL url;
         try {
-            url = new URL(host);
+            url = new URL(host + path);
         } catch (MalformedURLException e) {
             Log.e(TAG, "Wrong URL: " + host, e);
             return;
@@ -112,10 +113,14 @@ public class UploaderService extends IntentService {
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Content-Type","application/json");
             urlConnection.setDoOutput(true);
-            urlConnection.setChunkedStreamingMode(0);
+//            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.connect();
 
-            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
+
+            OutputStreamWriter out = new OutputStreamWriter(urlConnection.getOutputStream());
             writeProcessedRecordToStream(out, pr);
             out.flush();
 
@@ -152,7 +157,7 @@ public class UploaderService extends IntentService {
         }
     }
 
-    private void writeProcessedRecordToStream(OutputStream out, ProcessedRecord pr) throws IOException {
+    private void writeProcessedRecordToStream(Writer out, ProcessedRecord pr) throws IOException {
         JSONObject payload = new JSONObject();
 
         try {
@@ -163,7 +168,8 @@ public class UploaderService extends IntentService {
             e.printStackTrace();
         }
 
-        out.write(payload.toString().getBytes());
+        Log.d(TAG, "Sending: " + payload.toString());
+        out.write(payload.toString());
     }
 
     /**

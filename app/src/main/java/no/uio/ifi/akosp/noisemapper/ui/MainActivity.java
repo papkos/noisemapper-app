@@ -21,11 +21,15 @@ import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.DaoSession;
+import no.uio.ifi.akosp.noisemapper.model.ProcessedRecord;
+import no.uio.ifi.akosp.noisemapper.model.ProcessedRecordDao;
 import no.uio.ifi.akosp.noisemapper.model.Record;
+import no.uio.ifi.akosp.noisemapper.model.RecordDao;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.ListenerService;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
 import no.uio.ifi.akosp.noisemapper.services.ProcessorService;
+import no.uio.ifi.akosp.noisemapper.services.UploaderService;
 
 public class MainActivity extends AppCompatActivity
         implements PhoneStateService.PhoneStateRequestListener,
@@ -89,13 +93,41 @@ public class MainActivity extends AppCompatActivity
         appStatusView.setCallback(this);
         appStatusView.setSoundServiceEnabled(app.isServiceEnabled(ListenerService.SERVICE_ID));
 
-        Button oneOff = (Button) findViewById(R.id.oneOff);
-        oneOff.setOnClickListener(new View.OnClickListener() {
+        Button processLast = (Button) findViewById(R.id.processLast);
+        Button processAll = (Button) findViewById(R.id.processAll);
+        Button uploadLast = (Button) findViewById(R.id.uploadLast);
+        Button uploadAll = (Button) findViewById(R.id.uploadAll);
+        final DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
+        processLast.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
-                Record record = daoSession.getRecordDao().queryBuilder().limit(1).unique();
+                Record record = daoSession.getRecordDao().queryBuilder()
+                        .orderDesc(RecordDao.Properties.Id)
+                        .limit(1)
+                        .unique();
                 ProcessorService.startProcessingOne(getApplicationContext(), record.getId());
+            }
+        });
+        uploadLast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ProcessedRecord record = daoSession.getProcessedRecordDao().queryBuilder()
+                        .orderDesc(ProcessedRecordDao.Properties.Id)
+                        .limit(1)
+                        .unique();
+                UploaderService.startUploadingOne(getApplicationContext(), record.getId());
+            }
+        });
+        processAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProcessorService.startProcessingAll(getApplicationContext());
+            }
+        });
+        uploadAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UploaderService.startUploadingAll(getApplicationContext());
             }
         });
     }
