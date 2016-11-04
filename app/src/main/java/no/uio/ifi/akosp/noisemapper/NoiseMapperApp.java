@@ -20,6 +20,10 @@ public class NoiseMapperApp extends Application {
     public static final String PREF_SERVICE_ENABLED = "NoiseMapper::pref::serviceEnabled";
     public static final String PREF_UPDATE_VIEWS_ENABLED = "NoiseMapper::pref::updateViewsEnabled";
 
+    // These two are set from Preference screen, thus the simple key.
+    public static final String PREF_AUTO_PROCESS_ENABLED = "auto_process";
+    public static final String PREF_AUTO_UPLOAD_ENABLED = "auto_upload";
+
     protected File outFolder;
     protected File logFile;
 
@@ -63,6 +67,34 @@ public class NoiseMapperApp extends Application {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(PREF_UPDATE_VIEWS_ENABLED, enabled);
+        editor.apply();
+    }
+
+
+
+    public boolean isAutoProcessEnabled() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return preferences.getBoolean(PREF_AUTO_PROCESS_ENABLED, false);
+    }
+
+    public void setAutoProcessEnabled(boolean enabled) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(PREF_AUTO_PROCESS_ENABLED, enabled);
+        editor.apply();
+    }
+
+
+
+    public boolean isAutoUploadEnabled() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return preferences.getBoolean(PREF_AUTO_UPLOAD_ENABLED, false);
+    }
+
+    public void setAutoUploadEnabled(boolean enabled) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(PREF_AUTO_UPLOAD_ENABLED, enabled);
         editor.apply();
     }
 }

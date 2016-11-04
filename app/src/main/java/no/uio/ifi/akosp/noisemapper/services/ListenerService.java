@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.DaoSession;
@@ -121,6 +122,7 @@ public class ListenerService extends Service
         }
     };
     private DaoSession daoSession;
+    private NoiseMapperApp app;
 
     private void initializeTimingValuesFromPreferences(SharedPreferences sharedPreferences) {
         // Necessary to parse, as EditTextPreference always stores Strings.
@@ -140,6 +142,8 @@ public class ListenerService extends Service
     public void onCreate() {
         super.onCreate();
         daoSession = Utils.getDaoSession(getApplicationContext());
+
+        app = (NoiseMapperApp) getApplication();
 
         Intent intent = new Intent(this, PhoneStateService.class);
         bindService(intent, psConnection, Context.BIND_AUTO_CREATE);
@@ -318,6 +322,13 @@ public class ListenerService extends Service
 
                 daoSession.getRecordDao().save(record);
                 Log.i(TAG, String.format("Saved Record with id=%s", record.getId().toString()));
+
+                if (app.isAutoProcessEnabled()) {
+                    Log.i(TAG, String.format(
+                            "Auto process is enabled, so requesting to process Record with id=%s",
+                            record.getId().toString()));
+                    ProcessorService.startProcessingOne(getApplicationContext(), record.getId());
+                }
             }
         });
     }

@@ -27,4 +27,16 @@
         android:selectAllOnFocus="false"
         android:defaultValue="@string/defaultHost" />
 
+    <SwitchPreference
+        android:key="auto_process"
+        android:title="Auto process"
+        android:summary="Process recording right after it has been recorded."
+        android:defaultValue="false" />
+
+    <SwitchPreference
+        android:key="auto_upload"
+        android:title="Auto upload"
+        android:summary="Upload processed recording right after it has been processed."
+        android:defaultValue="false" />
+
 </PreferenceScreen>

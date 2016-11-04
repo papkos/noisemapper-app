@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.List;
 
+import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.DaoSession;
 import no.uio.ifi.akosp.noisemapper.model.ProcessedRecord;
@@ -36,6 +37,7 @@ public class ProcessorService extends IntentService {
 
     public static final String EXTRA_RECORD_ID = "ProcessorService::recordId";
     private DaoSession daoSession;
+    private NoiseMapperApp app;
 
     public ProcessorService() {
         super("ProcessorService");
@@ -45,6 +47,8 @@ public class ProcessorService extends IntentService {
     public void onCreate() {
         super.onCreate();
         daoSession = Utils.getDaoSession(getApplicationContext());
+
+        app = (NoiseMapperApp) getApplication();
     }
 
     @Override
@@ -110,6 +114,13 @@ public class ProcessorService extends IntentService {
 
             daoSession.getProcessedRecordDao().save(pr);
             Log.i(TAG, String.format("Saved ProcessedRecord with id=%s", pr.getId().toString()));
+
+            if (app.isAutoUploadEnabled()) {
+                Log.i(TAG, String.format(
+                        "Auto upload is enabled, so requesting to upload ProcessedRecord with id=%s",
+                        pr.getId().toString()));
+                UploaderService.startUploadingOne(getApplicationContext(), pr.getId());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
