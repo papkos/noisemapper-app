@@ -140,7 +140,7 @@ public class UploaderService extends IntentService {
             in.close();
 
             JSONObject response = new JSONObject(responseText);
-            if (response.has("result") && response.getBoolean("result")) {
+            if (response.has("success") && response.getBoolean("success")) {
                 pr.setUploaded(true);
                 daoSession.getProcessedRecordDao().save(pr);
                 Log.i(TAG, String.format("Updated ProcessedRecord with id=%s to uploaded=true",
@@ -161,7 +161,7 @@ public class UploaderService extends IntentService {
         JSONObject payload = new JSONObject();
 
         try {
-            payload.put("timestamp", pr.getTimestamp());
+            payload.put("timestamp", Utils.dateToString(pr.getTimestamp()));
             payload.put("processResult", new JSONObject(pr.getProcessResult()));
             payload.put("state", Utils.stateToJson(pr.getState()));
         } catch (JSONException e) {

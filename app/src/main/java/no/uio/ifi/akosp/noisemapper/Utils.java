@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import no.uio.ifi.akosp.noisemapper.model.DaoMaster;
@@ -144,6 +145,11 @@ public class Utils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+    public static String dateToString(Date date) {
+        return TIMESTAMP_FORMAT.format(date);
     }
 
     /**
