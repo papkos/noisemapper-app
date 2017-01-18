@@ -25,8 +25,10 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.Utils;
@@ -60,8 +62,25 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected float light = 0;
     protected InCallState inCallState = InCallState.NO_CALL;
 
-    protected boolean[] dataAvailable = new boolean[5];
+//    protected boolean[] dataAvailable = new boolean[5];
     private final Object dataAvailableLock = new Object();
+
+    public static final String DATA_ORIENTATION = "0";
+    public static final String DATA_PROXIMITY = "1";
+    public static final String DATA_LIGHT = "2";
+    public static final String DATA_CALL_STATE = "3";
+    public static final String DATA_LOCATION = "4";
+
+
+    protected Set<String> dataAvailable = new HashSet<>();
+    protected static final Set<String> DATA_REQUIRED = new HashSet<>();
+    static {
+        DATA_REQUIRED.add(DATA_ORIENTATION);
+        DATA_REQUIRED.add(DATA_PROXIMITY);
+        DATA_REQUIRED.add(DATA_LIGHT);
+        DATA_REQUIRED.add(DATA_CALL_STATE);
+        DATA_REQUIRED.add(DATA_LOCATION);
+    }
 
     protected SensorEventListener orientationListener = new SensorEventListener() {
         /* Based on http://www.codingforandroid.com/2011/01/using-orientation-sensors-simple.html */
@@ -80,7 +99,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
                     SensorManager.getOrientation(R, values);
                     orientation = new Orientation(values[0], values[1], values[2]);
                     Log.d(TAG, "Incoming orientation sensor reading");
-                    dataAvailable(0);
+                    dataAvailable(DATA_ORIENTATION);
                     sensorManager.unregisterListener(this);
                 } else {
                     Log.w(TAG, "SensorManager.getRotationMatrix() unsuccessful.");
@@ -99,7 +118,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
                 Log.d(TAG, "Incoming proximity sensor reading");
                 proximity = event.values[0];
-                dataAvailable(1);
+                dataAvailable(DATA_PROXIMITY);
                 sensorManager.unregisterListener(this);
             }
         }
@@ -114,7 +133,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
                 light = event.values[0];
-                dataAvailable(2);
+                dataAvailable(DATA_LIGHT);
                 sensorManager.unregisterListener(this);
             }
         }
@@ -143,7 +162,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         } else {
             inCallState = InCallState.NO_CALL;
         }
-        dataAvailable(3);
+        dataAvailable(DATA_CALL_STATE);
     }
 
     private List<PhoneStateRequest> requests =
@@ -173,17 +192,16 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         }
     }
 
-    protected void dataAvailable(int dataType) {
+    protected void dataAvailable(String dataType) {
         synchronized (dataAvailableLock) {
-            dataAvailable[dataType] = true;
+            dataAvailable.add(dataType);
 
-            for (boolean b : dataAvailable) {
-                if (!b) {
-                    return;
-                }
+            if (! dataAvailable.containsAll(DATA_REQUIRED)) {
+                return;
             }
+
             // All good, reset values for the next round
-            dataAvailable = new boolean[5];
+            dataAvailable.clear();
         }
 
 
@@ -276,7 +294,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             return;
         }
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        dataAvailable(4);
+        dataAvailable(DATA_LOCATION);
     }
 
     @Override
