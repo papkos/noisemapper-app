@@ -3,4 +3,18 @@
 
     <string name="preferences_file" translatable="false">preferences</string>
     <string name="databaseName" translatable="false">noisemapper-db</string>
+
+    <string name="defaultHost" translatable="false">https://***REMOVED***</string>
+    <string name="api_auth_local" translatable="false">super_secret</string>
+    <string name="api_auth_remote" translatable="false"><![CDATA[***REMOVED***]]></string>
+
+
+    <string-array name="upload_to_display">
+        <item>@string/upload_to_local</item>
+        <item>@string/upload_to_remote</item>
+    </string-array>
+    <string-array name="upload_to_values">
+        <item>local</item>
+        <item>remote</item>
+    </string-array>
 </resources>

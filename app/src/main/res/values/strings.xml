@@ -11,7 +11,7 @@
     <string name="notification_ongoing_title">NoiseMapper is measuring noise pollution</string>
     <string name="notification_ongoing_content">Noise pollution measurement is in progress. Tap here to review settings, and turn it off.</string>
 
-
-    <string name="defaultHost">https://ownserver.herokuapps.com/noisemapper</string>
+    <string name="upload_to_local">Local server (test)</string>
+    <string name="upload_to_remote">Remote server (production)</string>
 
 </resources>

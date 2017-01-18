@@ -27,6 +27,13 @@
         android:selectAllOnFocus="false"
         android:defaultValue="@string/defaultHost" />
 
+    <ListPreference
+        android:key='upload_to'
+        android:title="Upload to server"
+        android:entries="@array/upload_to_display"
+        android:entryValues="@array/upload_to_values"
+        android:defaultValue="remote" />
+
     <SwitchPreference
         android:key="auto_process"
         android:title="Auto process"

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -18,6 +19,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
@@ -37,11 +40,16 @@ public class UploaderService extends IntentService {
     public static final String ACTION_UPLOAD_ONE = "UploaderService::UploadOne";
 
     public static final String EXTRA_PROCESSED_RECORD_ID = "UploaderService::processedRecordId";
-    
+
+    private static final String path = "/api/upload_recording/";
+
+    public static final String API_AUTH_HEADER = "X-Noisemapper-Api-Auth";
+
+
     private DaoSession daoSession;
     private String host;
-    private static final String path = "/api/upload_recording/";
-    
+    private String apiAuthSecret;
+
     public UploaderService() {
         super("UploaderService");
     }
@@ -52,6 +60,14 @@ public class UploaderService extends IntentService {
         daoSession = Utils.getDaoSession(getApplicationContext());
         host = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
                 .getString("host_url", getString(R.string.defaultHost));
+        String uploadTo = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString("upload_to", "remote");
+
+        if ("remote".equals(uploadTo)) {
+            apiAuthSecret = getString(R.string.api_auth_remote);
+        } else {
+            apiAuthSecret = getString(R.string.api_auth_local);
+        }
     }
 
     @Override
@@ -112,8 +128,10 @@ public class UploaderService extends IntentService {
 
         HttpURLConnection urlConnection = null;
         try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("Content-Type","application/json");
+            urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty(API_AUTH_HEADER, Base64.encodeToString(apiAuthSecret.getBytes(), Base64.DEFAULT));
+
             urlConnection.setDoOutput(true);
 //            urlConnection.setChunkedStreamingMode(0);
             urlConnection.setRequestMethod("POST");
