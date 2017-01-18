@@ -308,7 +308,7 @@ public class ListenerService extends Service
     }
 
     @Override
-    public void handleRecordingReady(UUID uuid, final File file, final State phoneState) {
+    public void handleRecordingReady(final UUID uuid, final File file, final State phoneState) {
         daoSession.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -316,6 +316,7 @@ public class ListenerService extends Service
                 Log.i(TAG, String.format("Saved State with id=%s", phoneState.getId().toString()));
 
                 Record record = new Record();
+                record.setUuid(uuid.toString());
                 record.setFilename(file.getAbsolutePath());
                 record.setTimestamp(new Date(file.lastModified()));
                 record.setState(phoneState);

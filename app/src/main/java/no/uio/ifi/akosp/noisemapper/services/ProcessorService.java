@@ -111,6 +111,8 @@ public class ProcessorService extends IntentService {
             pr.setProcessResult(result);
             pr.setState(record.getState());
             pr.setTimestamp(record.getTimestamp());
+            pr.setUuid(record.getUuid());
+            pr.setFilename(record.getFilename());
 
             daoSession.getProcessedRecordDao().save(pr);
             Log.i(TAG, String.format("Saved ProcessedRecord with id=%s", pr.getId().toString()));

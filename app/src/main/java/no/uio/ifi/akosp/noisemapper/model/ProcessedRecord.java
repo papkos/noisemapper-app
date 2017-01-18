@@ -21,6 +21,9 @@ public class ProcessedRecord {
     protected Long id;
 
     @NotNull
+    protected String uuid;
+
+    @NotNull
     protected Date timestamp;
 
     @ToOne(joinProperty = "stateId")
@@ -31,6 +34,8 @@ public class ProcessedRecord {
 
     protected String processResult;
 
+    protected String filename;
+
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
@@ -39,14 +44,16 @@ public class ProcessedRecord {
     @Generated(hash = 1576352220)
     private transient ProcessedRecordDao myDao;
 
-    @Generated(hash = 756768005)
-    public ProcessedRecord(Long id, @NotNull Date timestamp, Long stateId,
-            boolean uploaded, String processResult) {
+    @Generated(hash = 450290653)
+    public ProcessedRecord(Long id, @NotNull String uuid, @NotNull Date timestamp,
+            Long stateId, boolean uploaded, String processResult, String filename) {
         this.id = id;
+        this.uuid = uuid;
         this.timestamp = timestamp;
         this.stateId = stateId;
         this.uploaded = uploaded;
         this.processResult = processResult;
+        this.filename = filename;
     }
 
     @Generated(hash = 1288854789)
@@ -59,6 +66,14 @@ public class ProcessedRecord {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Date getTimestamp() {
@@ -91,6 +106,14 @@ public class ProcessedRecord {
 
     public void setProcessResult(String processResult) {
         this.processResult = processResult;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     @Generated(hash = 1617069713)

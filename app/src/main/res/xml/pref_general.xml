@@ -1,6 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <EditTextPreference
+        android:key="device_name"
+        android:title="Device name"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:defaultValue="" />
+
+    <EditTextPreference
         android:key="repeat_interval"
         android:title="@string/pref_title_repeat_interval"
         android:singleLine="true"
@@ -44,6 +51,11 @@
         android:key="auto_upload"
         android:title="Auto upload"
         android:summary="Upload processed recording right after it has been processed."
+        android:defaultValue="false" />
+
+    <SwitchPreference
+        android:key="delete_after_upload"
+        android:title="Delete files after uploading"
         android:defaultValue="false" />
 
 </PreferenceScreen>

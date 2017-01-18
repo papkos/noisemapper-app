@@ -20,6 +20,9 @@ public class Record {
     protected Long id;
 
     @NotNull
+    protected String uuid;
+
+    @NotNull
     protected Date timestamp;
 
     @ToOne(joinProperty = "stateId")
@@ -38,10 +41,11 @@ public class Record {
     @Generated(hash = 765166123)
     private transient RecordDao myDao;
 
-    @Generated(hash = 293258094)
-    public Record(Long id, @NotNull Date timestamp, Long stateId, String filename,
-            boolean processed) {
+    @Generated(hash = 1230296149)
+    public Record(Long id, @NotNull String uuid, @NotNull Date timestamp, Long stateId,
+            String filename, boolean processed) {
         this.id = id;
+        this.uuid = uuid;
         this.timestamp = timestamp;
         this.stateId = stateId;
         this.filename = filename;
@@ -61,6 +65,14 @@ public class Record {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Date getTimestamp() {

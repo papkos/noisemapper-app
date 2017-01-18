@@ -107,6 +107,6 @@ public class Recorder implements Runnable {
 
     private File getOutFile() {
         final String filename = "record_" + Utils.FILENAME_FORMATTER.format(new Date()) + ".3gp";
-        return new File(context.getCacheDir(), filename);
+        return new File(context.getDir("recordings", Context.MODE_PRIVATE), filename);
     }
 }
