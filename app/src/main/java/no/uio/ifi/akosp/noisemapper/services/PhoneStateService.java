@@ -2,6 +2,7 @@ package no.uio.ifi.akosp.noisemapper.services;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -9,6 +10,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -53,6 +56,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected Sensor magnetometer;
     protected Sensor proximitySensor;
     protected Sensor lightSensor;
+    protected LocationManager locationManager;
+
     float[] mGravity;
     float[] mGeomagnetic;
     boolean receiversRegistered = false;
@@ -62,7 +67,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected float light = 0;
     protected InCallState inCallState = InCallState.NO_CALL;
 
-//    protected boolean[] dataAvailable = new boolean[5];
+    //    protected boolean[] dataAvailable = new boolean[5];
     private final Object dataAvailableLock = new Object();
 
     public static final String DATA_ORIENTATION = "0";
@@ -74,6 +79,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
 
     protected Set<String> dataAvailable = new HashSet<>();
     protected static final Set<String> DATA_REQUIRED = new HashSet<>();
+
     static {
         DATA_REQUIRED.add(DATA_ORIENTATION);
         DATA_REQUIRED.add(DATA_PROXIMITY);
@@ -143,6 +149,23 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         }
     };
 
+    protected LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location incomingLocation) {
+            // Called when a new location is found by the network location provider.
+            location = incomingLocation;
+            dataAvailable(DATA_LOCATION);
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+    };
+
     protected void fetchPhoneState() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         int state = telephonyManager.getCallState();
@@ -180,6 +203,9 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
+        // Acquire a reference to the system Location Manager
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
         fetchPhoneState();
 
         // Create an instance of GoogleAPIClient.
@@ -196,7 +222,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         synchronized (dataAvailableLock) {
             dataAvailable.add(dataType);
 
-            if (! dataAvailable.containsAll(DATA_REQUIRED)) {
+            if (!dataAvailable.containsAll(DATA_REQUIRED)) {
                 return;
             }
 
@@ -250,13 +276,13 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
 
         registerSensors();
         fetchPhoneState();
-        if (mGoogleApiClient.isConnected()) {
-            fetchLocation();
-        } else if (mGoogleApiClient.isConnecting()) {
-            /* nothing to do here, wait for successful connection */
-        }else {
-            mGoogleApiClient.connect();
-        }
+//        if (mGoogleApiClient.isConnected()) {
+//            fetchLocation();
+//        } else if (mGoogleApiClient.isConnecting()) {
+//            /* nothing to do here, wait for successful connection */
+//        } else {
+//            mGoogleApiClient.connect();
+//        }
         receiversRegistered = true;
     }
 
@@ -265,24 +291,11 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         sensorManager.registerListener(orientationListener, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
 
-    private void unregisterFromEvents() {
-        if (!receiversRegistered) return;
-
-        sensorManager.unregisterListener(orientationListener);
-        sensorManager.unregisterListener(proximityListener);
-        sensorManager.unregisterListener(lightSensorListener);
-        receiversRegistered = false;
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle connectionHint) {
-        fetchLocation();
-    }
-
-    protected void fetchLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+        // Register the listener with the Location Manager to receive location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -293,9 +306,55 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        dataAvailable(DATA_LOCATION);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 1, locationListener);
     }
+
+    private void unregisterFromEvents() {
+        if (!receiversRegistered) return;
+
+        sensorManager.unregisterListener(orientationListener);
+        sensorManager.unregisterListener(proximityListener);
+        sensorManager.unregisterListener(lightSensorListener);
+
+        // Remove the listener you previously added
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.removeUpdates(locationListener);
+
+        receiversRegistered = false;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle connectionHint) {
+//        fetchLocation();
+    }
+
+//    protected void fetchLocation() {
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        dataAvailable(DATA_LOCATION);
+//    }
 
     @Override
     public void onConnectionSuspended(int i) {
