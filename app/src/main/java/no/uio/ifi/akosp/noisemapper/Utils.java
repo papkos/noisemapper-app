@@ -129,8 +129,8 @@ public class Utils {
         try {
             jo = new JSONObject(json);
             return new SimpleLocation(
-                    jo.getDouble("lon"),
                     jo.getDouble("lat"),
+                    jo.getDouble("lon"),
                     jo.has("altitude"),
                     (float) (jo.has("altitude") ? jo.getDouble("altitude") : 0),
                     jo.has("speed"),
