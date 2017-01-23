@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -206,7 +207,7 @@ public class UploaderService extends IntentService {
                 JSONObject responseToLog = new JSONObject(responseText);
                 responseToLog.put("uuids_processed_length", responseToLog.getJSONArray("uuids_processed").length());
                 responseToLog.remove("uuids_processed");
-                Log.d(TAG, "Server response:\n" + responseToLog.toString(2));
+                Log.i(TAG, "Server response:\n" + responseToLog.toString(2));
 
                 if (response.has("success") && response.getBoolean("success") && response.has("uuids_processed")) {
                     JSONArray uuidsProcessedJson = response.getJSONArray("uuids_processed");
@@ -220,7 +221,7 @@ public class UploaderService extends IntentService {
                         }
                         pr.setUploaded(true);
                         daoSession.getProcessedRecordDao().save(pr);
-                        Log.i(TAG, String.format("Updated ProcessedRecord with id=%s to uploaded=true",
+                        Log.d(TAG, String.format("Updated ProcessedRecord with id=%s to uploaded=true",
                                 pr.getId().toString()));
                         if (deleteSoundFileAfterUpload) {
                             File f = new File(pr.getFilename());
@@ -242,7 +243,9 @@ public class UploaderService extends IntentService {
             }
         }
 
-        Log.i(TAG, String.format("Uploaded %d ProcessedRecordings in %d request(s)", prList.size(), requestCnt));
+        final String logMsg = String.format("Uploaded %d ProcessedRecordings in %d request(s)", prList.size(), requestCnt);
+        Log.i(TAG, logMsg);
+        Toast.makeText(getApplicationContext(), logMsg, Toast.LENGTH_SHORT).show();
     }
 
     private void uploadOneAndStore(ProcessedRecord pr) {
