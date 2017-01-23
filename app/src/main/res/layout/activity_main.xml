@@ -8,9 +8,16 @@
     tools:context="no.uio.ifi.akosp.noisemapper.ui.MainActivity">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <no.uio.ifi.akosp.noisemapper.ui.AppStatusView
+            android:id="@+id/appStatusView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/activity_horizontal_margin"/>
 
         <no.uio.ifi.akosp.noisemapper.ui.PhoneStatusView
             android:id="@+id/phoneStatusView"
@@ -19,49 +26,8 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/activity_horizontal_margin"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Process last"
-                android:id="@+id/processLast" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Upload last"
-                android:id="@+id/uploadLast" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Process all"
-                android:id="@+id/processAll" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Upload all"
-                android:id="@+id/uploadAll" />
-
-        </LinearLayout>
-
-
-        <no.uio.ifi.akosp.noisemapper.ui.AppStatusView
-            android:id="@+id/appStatusView"
+        <no.uio.ifi.akosp.noisemapper.ui.StatisticsView
+            android:id="@+id/statisticsView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

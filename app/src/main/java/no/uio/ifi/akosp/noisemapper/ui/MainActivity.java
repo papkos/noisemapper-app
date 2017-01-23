@@ -12,18 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
+import java.io.File;
 import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.NoiseMapperApp;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.DaoSession;
-import no.uio.ifi.akosp.noisemapper.model.ProcessedRecord;
 import no.uio.ifi.akosp.noisemapper.model.ProcessedRecordDao;
-import no.uio.ifi.akosp.noisemapper.model.Record;
 import no.uio.ifi.akosp.noisemapper.model.RecordDao;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.ListenerService;
@@ -34,9 +31,11 @@ import no.uio.ifi.akosp.noisemapper.services.UploaderService;
 public class MainActivity extends AppCompatActivity
         implements PhoneStateService.PhoneStateRequestListener,
                    AppStatusView.AppStatusViewInteractionListener,
-                   PhoneStatusView.PhoneStatusViewInteractionListener {
+                   PhoneStatusView.PhoneStatusViewInteractionListener,
+                   StatisticsView.StatisticsViewInteractionListener {
 
     public static final String TAG = "MainActivity";
+    private static final int STATISTICS_COLLECTION_INTERVAL_MS = 1 * 1000;
 
     protected boolean psServiceBound;
     protected PhoneStateService psService;
@@ -44,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     private PhoneStatusView phoneStatusView;
     private AppStatusView appStatusView;
+    private StatisticsView statisticsView;
 
     protected Handler handler = new Handler();
 
@@ -78,6 +78,30 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    protected Runnable statsCollector = new Runnable() {
+
+        @Override
+        public void run() {
+            StatisticsView.Statistics stats = new StatisticsView.Statistics();
+            DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
+            stats.records = (int) daoSession.getRecordDao().count();
+            stats.unprocessed = (int) daoSession.getRecordDao().queryBuilder().where(RecordDao.Properties.Processed.eq(false)).count();
+            stats.notUploaded = (int) daoSession.getProcessedRecordDao().queryBuilder().where(ProcessedRecordDao.Properties.Uploaded.eq(false)).count();
+
+            stats.files = stats.spaceUsed = 0;
+            File recDir = getApplicationContext().getDir("recordings", Context.MODE_PRIVATE);
+            for (File f : recDir.listFiles()) {
+                if (f.exists() && f.isFile()) {
+                    stats.files++;
+                    stats.spaceUsed += f.length();
+                }
+            }
+
+            statisticsView.setStatistics(stats);
+            handler.postDelayed(statsCollector, STATISTICS_COLLECTION_INTERVAL_MS);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,43 +117,10 @@ public class MainActivity extends AppCompatActivity
         appStatusView.setCallback(this);
         appStatusView.setSoundServiceEnabled(app.isServiceEnabled(ListenerService.SERVICE_ID));
 
-        Button processLast = (Button) findViewById(R.id.processLast);
-        Button processAll = (Button) findViewById(R.id.processAll);
-        Button uploadLast = (Button) findViewById(R.id.uploadLast);
-        Button uploadAll = (Button) findViewById(R.id.uploadAll);
-        final DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
-        processLast.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Record record = daoSession.getRecordDao().queryBuilder()
-                        .orderDesc(RecordDao.Properties.Id)
-                        .limit(1)
-                        .unique();
-                ProcessorService.startProcessingOne(getApplicationContext(), record.getId());
-            }
-        });
-        uploadLast.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ProcessedRecord record = daoSession.getProcessedRecordDao().queryBuilder()
-                        .orderDesc(ProcessedRecordDao.Properties.Id)
-                        .limit(1)
-                        .unique();
-                UploaderService.startUploadingOne(getApplicationContext(), record.getId());
-            }
-        });
-        processAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ProcessorService.startProcessingAll(getApplicationContext());
-            }
-        });
-        uploadAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UploaderService.startUploadingAll(getApplicationContext());
-            }
-        });
+        statisticsView = (StatisticsView) findViewById(R.id.statisticsView);
+        statisticsView.setCallback(this);
+        handler.post(statsCollector);
+
     }
 
     @Override
@@ -183,6 +174,16 @@ public class MainActivity extends AppCompatActivity
         } else {
             unbindFromPSService();
         }
+    }
+
+    @Override
+    public void onRequestProcessAll() {
+        ProcessorService.startProcessingAll(getApplicationContext());
+    }
+
+    @Override
+    public void onRequestUploadAll() {
+        UploaderService.startUploadingAll(getApplicationContext());
     }
 
     @Override

@@ -3,5 +3,6 @@
     <declare-styleable name="PhoneStatusView">
         <attr name="phoneStatusViewStyle" format="reference"/>
         <attr name="appStatusViewStyle" format="reference"/>
+        <attr name="statisticsViewStyle" format="reference"/>
     </declare-styleable>
 </resources>

@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="phoneStatusViewStyle">@style/DefaultStatusCardStyle</item>
         <item name="appStatusViewStyle">@style/DefaultStatusCardStyle</item>
+        <item name="statisticsViewStyle">@style/DefaultStatusCardStyle</item>
     </style>
 
     <style name="DefaultStatusCardStyle">
