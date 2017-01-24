@@ -25,7 +25,7 @@ import no.uio.ifi.akosp.noisemapper.model.RecordDao;
 import no.uio.ifi.akosp.noisemapper.model.State;
 import no.uio.ifi.akosp.noisemapper.services.ListenerService;
 import no.uio.ifi.akosp.noisemapper.services.PhoneStateService;
-import no.uio.ifi.akosp.noisemapper.services.ProcessorService;
+import no.uio.ifi.akosp.noisemapper.services.ProcessorService2;
 import no.uio.ifi.akosp.noisemapper.services.UploaderService;
 
 public class MainActivity extends AppCompatActivity
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestProcessAll() {
-        ProcessorService.startProcessingAll(getApplicationContext());
+        ProcessorService2.startProcessingAll(getApplicationContext());
     }
 
     @Override

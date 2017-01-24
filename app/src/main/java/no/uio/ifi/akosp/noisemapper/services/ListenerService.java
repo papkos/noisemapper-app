@@ -60,7 +60,7 @@ public class ListenerService extends Service
         @Override
         public void run() {
             UUID uuid = UUID.randomUUID();
-            new Thread(new Recorder(getApplicationContext(), uuid, recordingDurationMs)).start();
+            new Thread(new Recorder2(getApplicationContext(), uuid, recordingDurationMs)).start();
             handler.postDelayed(recurringRecorderRunnable, repeatIntervalSec * 1000);
         }
     };
@@ -328,7 +328,7 @@ public class ListenerService extends Service
                     Log.i(TAG, String.format(
                             "Auto process is enabled, so requesting to process Record with id=%s",
                             record.getId().toString()));
-                    ProcessorService.startProcessingOne(getApplicationContext(), record.getId());
+                    ProcessorService2.startProcessingOne(getApplicationContext(), record.getId());
                 }
             }
         });

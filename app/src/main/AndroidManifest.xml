@@ -49,6 +49,9 @@
             android:name=".services.ProcessorService"
             android:exported="false" />
         <service
+            android:name=".services.ProcessorService2"
+            android:exported="false" />
+        <service
             android:name=".services.UploaderService"
             android:exported="false"></service>
     </application>

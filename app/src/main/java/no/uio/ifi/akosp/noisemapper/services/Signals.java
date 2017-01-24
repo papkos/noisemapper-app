@@ -25,6 +25,7 @@ public class Signals {
     public static final String EXTRA_UUID = "Signals::uuid";
     public static final String EXTRA_DURATION_MS = "Signals::durationMs";
     public static final String EXTRA_FILE = "Signals::file";
+    public static final String EXTRA_THROWABLE = "Signals::throwable";
 
     public static void sendBeforeRecordingStart(Context context, UUID uuid, int expectedDurationMs) {
         Intent i = new Intent();
@@ -65,13 +66,20 @@ public class Signals {
     }
 
     public static void sendStartRecordingFailed(Context context, UUID uuid) {
+        sendStartRecordingFailed(context, uuid, null);
+    }
+
+    public static void sendStartRecordingFailed(Context context, UUID uuid, Throwable e) {
         Intent i = new Intent();
         i.setAction(ACTION_START_RECORDING_FAILED);
         i.putExtra(EXTRA_UUID, uuid);
+        if (e != null) {
+            i.putExtra(EXTRA_THROWABLE, e);
+        }
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 
-        Log.i(TAG, String.format(Locale.getDefault(),
+        Log.e(TAG, String.format(Locale.getDefault(),
                 "Sending 'StartRecordingFailed' signal [%s]",
-                i.getExtras().toString()));
+                i.getExtras().toString()), e);
     }
 }

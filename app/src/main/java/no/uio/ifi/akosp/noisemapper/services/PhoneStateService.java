@@ -192,7 +192,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             Collections.synchronizedList(new ArrayList<PhoneStateRequest>());
 
     private GoogleApiClient mGoogleApiClient;
-    private Location location;
+    private Location location = new Location("null");
 
     @Override
     public void onCreate() {
