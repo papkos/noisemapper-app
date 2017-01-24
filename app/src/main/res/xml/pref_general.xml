@@ -58,4 +58,10 @@
         android:title="Delete files after uploading"
         android:defaultValue="false" />
 
+    <SwitchPreference
+        android:key="allow_no_location"
+        android:title="Allow no location"
+        android:summary="Allow everything to work normally, even if there's no location info (GPS)."
+        android:defaultValue="false" />
+
 </PreferenceScreen>
