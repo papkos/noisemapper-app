@@ -57,7 +57,7 @@ public class UploaderService extends IntentService {
 
     public static final String API_AUTH_HEADER = "X-Noisemapper-Api-Auth";
     public static final String API_DEVICE_NAME = "X-Noisemapper-Api-Device-Name";
-    public static final int MAX_PAYLOAD_SIZE = 70 * 1024 * 1024; /* bytes */
+    public static final int MAX_PAYLOAD_SIZE = 10 * 1024 * 1024; /* bytes */
 
 
     private DaoSession daoSession;

@@ -32,9 +32,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <service
-            android:name=".services.ListenerService"
-            android:exported="false" />
 
         <activity
             android:name=".ui.SettingsActivity"
@@ -44,7 +41,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="no.uio.ifi.akosp.noisemapper.ui.MainActivity" />
         </activity>
+        <activity android:name=".ui.AnalyticsActivity"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="no.uio.ifi.akosp.noisemapper.ui.MainActivity" />
+        </activity>
 
+        <service
+            android:name=".services.ListenerService"
+            android:exported="false" />
         <service
             android:name=".services.ProcessorService"
             android:exported="false" />
@@ -53,7 +59,8 @@
             android:exported="false" />
         <service
             android:name=".services.UploaderService"
-            android:exported="false"></service>
+            android:exported="false" />
+
     </application>
 
 </manifest>

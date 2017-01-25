@@ -4,5 +4,7 @@
         <attr name="phoneStatusViewStyle" format="reference"/>
         <attr name="appStatusViewStyle" format="reference"/>
         <attr name="statisticsViewStyle" format="reference"/>
+        <attr name="analyticsParamsViewStyle" format="reference"/>
+        <attr name="mapCardViewStyle" format="reference"/>
     </declare-styleable>
 </resources>
