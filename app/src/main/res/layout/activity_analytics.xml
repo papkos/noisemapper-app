@@ -12,15 +12,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <no.uio.ifi.akosp.noisemapper.ui.AnalyticsParamsView
-            android:id="@+id/analyticsParamsView"
+        <no.uio.ifi.akosp.noisemapper.ui.MapCardView
+            android:id="@+id/mapCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/activity_horizontal_margin"/>
 
-        <no.uio.ifi.akosp.noisemapper.ui.MapCardView
-            android:id="@+id/mapCardView"
+        <no.uio.ifi.akosp.noisemapper.ui.AnalyticsParamsView
+            android:id="@+id/analyticsParamsView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
