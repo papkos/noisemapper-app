@@ -28,6 +28,9 @@ public class AnalyticsActivity extends AppCompatActivity implements RWAdapter.On
 
     public static final String TAG = "MainActivity";
 
+    @Bind(R.id.smartScrollView)
+    protected SmartScrollView smartScrollView;
+
     @Bind(R.id.recordsList)
     protected RecyclerView recordsListView;
 
@@ -45,6 +48,8 @@ public class AnalyticsActivity extends AppCompatActivity implements RWAdapter.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_analytics);
         ButterKnife.bind(this);
+
+        smartScrollView.addInterceptScrollView(mapCardView);
 
         app = (NoiseMapperApp) getApplication();
         daoSession = Utils.getDaoSession(this);
@@ -89,9 +94,40 @@ public class AnalyticsActivity extends AppCompatActivity implements RWAdapter.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mapCardView.onDestroy();
         if (lazyPrList != null) {
             lazyPrList.close();
         }
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapCardView.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mapCardView.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapCardView.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        mapCardView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapCardView.onLowMemory();
     }
 }

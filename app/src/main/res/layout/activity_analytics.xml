@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<no.uio.ifi.akosp.noisemapper.ui.SmartScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scrollView"
+    android:id="@+id/smartScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="no.uio.ifi.akosp.noisemapper.ui.AnalyticsActivity">
@@ -31,4 +32,4 @@
             android:layout_height="500dp"/>
 
     </LinearLayout>
-</ScrollView>
+</no.uio.ifi.akosp.noisemapper.ui.SmartScrollView>

@@ -163,6 +163,17 @@ public class MapCardView extends CardView implements OnMapReadyCallback {
             map.clear();
         }
 
+        if (moList.isEmpty()) {
+            map.moveCamera(CameraUpdateFactory.zoomTo(12F));
+            return;
+        }
+
+        if (moList.size() == 1) {
+            Marker m = map.addMarker(moList.get(0));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 15F));
+            return;
+        }
+
         List<Marker> markers = new ArrayList<>(moList.size());
         for (MarkerOptions mo : moList) {
             markers.add(map.addMarker(mo));
@@ -173,9 +184,33 @@ public class MapCardView extends CardView implements OnMapReadyCallback {
             builder.include(marker.getPosition());
         }
         LatLngBounds bounds = builder.build();
-        int padding = 0; // offset from edges of the map in pixels
+        int padding = 20; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         map.moveCamera(cu);
+    }
+
+    protected void onResume() {
+        mapView.onResume();
+    }
+
+    protected void onStart() {
+        mapView.onStart();
+    }
+
+    protected void onStop() {
+        mapView.onStop();
+    }
+
+    protected void onPause() {
+        mapView.onPause();
+    }
+
+    protected void onDestroy() {
+        mapView.onDestroy();
+    }
+
+    public void onLowMemory() {
+        mapView.onLowMemory();
     }
 
     static class SavedState extends BaseSavedState {
