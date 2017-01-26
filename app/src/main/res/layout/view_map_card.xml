@@ -5,11 +5,17 @@
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="400dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:mapType="normal"
-        app:liteMode="true"
+        app:liteMode="false"
+        app:uiCompass="false"
+        app:uiRotateGestures="false"
+        app:uiScrollGestures="true"
+        app:uiTiltGestures="false"
+        app:uiZoomControls="false"
+        app:uiZoomGestures="true"
         />
 
 </merge>

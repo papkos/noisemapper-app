@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<no.uio.ifi.akosp.noisemapper.ui.SmartScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scrollView"
+    android:id="@+id/smartScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="no.uio.ifi.akosp.noisemapper.ui.AnalyticsActivity">
@@ -11,15 +12,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <no.uio.ifi.akosp.noisemapper.ui.AnalyticsParamsView
-            android:id="@+id/analyticsParamsView"
+        <no.uio.ifi.akosp.noisemapper.ui.MapCardView
+            android:id="@+id/mapCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/activity_horizontal_margin"/>
 
-        <no.uio.ifi.akosp.noisemapper.ui.MapCardView
-            android:id="@+id/mapCardView"
+        <no.uio.ifi.akosp.noisemapper.ui.AnalyticsParamsView
+            android:id="@+id/analyticsParamsView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -31,4 +32,4 @@
             android:layout_height="500dp"/>
 
     </LinearLayout>
-</ScrollView>
+</no.uio.ifi.akosp.noisemapper.ui.SmartScrollView>
