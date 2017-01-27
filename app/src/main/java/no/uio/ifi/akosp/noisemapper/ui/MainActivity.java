@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     protected boolean psServiceBound;
     protected PhoneStateService psService;
     protected NoiseMapperApp app;
+    private DaoSession daoSession;
 
     private PhoneStatusView phoneStatusView;
     private AppStatusView appStatusView;
@@ -82,8 +83,8 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void run() {
+            Log.d(TAG, "Collecting statistics");
             StatisticsView.Statistics stats = new StatisticsView.Statistics();
-            DaoSession daoSession = Utils.getDaoSession(getApplicationContext());
             stats.records = (int) daoSession.getRecordDao().count();
             stats.unprocessed = (int) daoSession.getRecordDao().queryBuilder().where(RecordDao.Properties.Processed.eq(false)).count();
             stats.notUploaded = (int) daoSession.getProcessedRecordDao().queryBuilder().where(ProcessedRecordDao.Properties.Uploaded.eq(false)).count();
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         app = (NoiseMapperApp) getApplication();
+        daoSession = Utils.getDaoSession(getApplicationContext());
 
         phoneStatusView = (PhoneStatusView) findViewById(R.id.phoneStatusView);
         phoneStatusView.setCallback(this);
@@ -119,7 +121,6 @@ public class MainActivity extends AppCompatActivity
 
         statisticsView = (StatisticsView) findViewById(R.id.statisticsView);
         statisticsView.setCallback(this);
-        handler.post(statsCollector);
 
     }
 
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity
         if (app.isUpdateViewsEnabled()) {
             bindToPSService();
         }
+        handler.post(statsCollector);
     }
 
     private void bindToPSService() {
@@ -141,6 +143,13 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         unbindFromPSService();
+        handler.removeCallbacks(statsCollector);
+    }
+
+    @Override
+    protected void onDestroy() {
+        daoSession.getDatabase().close();
+        super.onDestroy();
     }
 
     private void unbindFromPSService() {

@@ -333,6 +333,4 @@ public class ListenerService extends Service
             }
         });
     }
-
-
 }

@@ -155,6 +155,7 @@ public class UploaderService extends IntentService {
             List<JSONObject> payload = new ArrayList<>();
             int payloadSize = 0;
             do {
+                // TODO: move out of the while-loop to cache, and avoid processing an overflowing record twice.
                 final JSONObject json = processedRecordToJson(prList.get(prListI));
                 if (payloadSize + json.toString().length() < MAX_PAYLOAD_SIZE) {
                     payload.add(json);

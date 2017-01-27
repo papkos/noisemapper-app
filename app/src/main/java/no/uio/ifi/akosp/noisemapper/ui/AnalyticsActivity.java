@@ -64,6 +64,9 @@ public class AnalyticsActivity extends AppCompatActivity implements RWAdapter.On
 
     LazyList<ProcessedRecord> lazyPrList = null;
     private void updateList() {
+        if (lazyPrList != null) {
+            lazyPrList.close();
+        }
         lazyPrList = daoSession.getProcessedRecordDao().queryBuilder()
                 .orderDesc(ProcessedRecordDao.Properties.Timestamp)
 //                .limit(100)
@@ -98,6 +101,7 @@ public class AnalyticsActivity extends AppCompatActivity implements RWAdapter.On
         if (lazyPrList != null) {
             lazyPrList.close();
         }
+        daoSession.getDatabase().close();
         super.onDestroy();
     }
 
