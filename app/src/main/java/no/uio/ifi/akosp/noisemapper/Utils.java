@@ -72,6 +72,7 @@ public class Utils {
             root.put("inPocket", state.isInPocket());
             root.put("inCallState", state.getInCallState().name());
             root.put("stepCount", state.getStepCount());
+            root.put("micSource", state.getMicSource().name());
             root.put("timestamp", state.getTimestampString());
 
         } catch (JSONException e) {

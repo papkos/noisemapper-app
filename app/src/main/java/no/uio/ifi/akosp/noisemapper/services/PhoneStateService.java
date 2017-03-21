@@ -13,6 +13,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -38,6 +39,7 @@ import java.util.UUID;
 
 import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.InCallState;
+import no.uio.ifi.akosp.noisemapper.model.MicSource;
 import no.uio.ifi.akosp.noisemapper.model.Orientation;
 import no.uio.ifi.akosp.noisemapper.model.State;
 
@@ -183,6 +185,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
 
         }
     };
+    private AudioManager audioManager;
 
     public int getGlobalStepCount() {
         return globalStepCount;
@@ -231,6 +234,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setAllowNoLocation(preferences.getBoolean("allow_no_location", false));
@@ -276,9 +281,17 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             dataAvailable.clear();
         }
 
+        // Deprecated but we really only use it to decide if the headset is plugged in or not.
+        // Even if it is, that does not necessarily mean that the mic source is the headset,
+        // but most likely it is, which is good enough for now.
+        //noinspection deprecation
+        boolean isHeadsetPluggedIn = audioManager.isWiredHeadsetOn();
+        MicSource micSource = (isHeadsetPluggedIn ? MicSource.HEADSET : MicSource.INTERNAL);
+
 
         State state = new State(orientation, proximity, makeProximityText(proximity), light,
-                Utils.isInPocket(orientation, proximity, light), inCallState, location, 0, new Date());
+                Utils.isInPocket(orientation, proximity, light), inCallState, location, 0,
+                micSource, new Date());
 
         if (!requests.isEmpty()) {
             Iterator<PhoneStateRequest> it = requests.iterator();

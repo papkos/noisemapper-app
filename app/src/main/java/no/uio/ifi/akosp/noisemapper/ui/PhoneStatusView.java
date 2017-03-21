@@ -27,6 +27,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import no.uio.ifi.akosp.noisemapper.R;
 import no.uio.ifi.akosp.noisemapper.Utils;
+import no.uio.ifi.akosp.noisemapper.model.MicSource;
 import no.uio.ifi.akosp.noisemapper.model.Orientation;
 import no.uio.ifi.akosp.noisemapper.model.State;
 
@@ -59,6 +60,9 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
 
     @Bind(R.id.isInCall)
     protected CheckBox isInCallDisplay;
+
+    @Bind(R.id.isHeadset)
+    protected CheckBox isHeadsetDisplay;
 
     @Bind(R.id.phoneLocation)
     protected MapView phoneLocationView;
@@ -125,6 +129,8 @@ public class PhoneStatusView extends CardView implements OnMapReadyCallback {
             lightSensorDisplay.setText(String.format(Locale.US, "%.2f lux", state.getLight()));
 
             isInPocketDisplay.setChecked(Utils.isInPocket(state));
+
+            isHeadsetDisplay.setChecked(state.getMicSource() == MicSource.HEADSET);
 
             switch (state.getInCallState()) {
                 case IN_CALL:

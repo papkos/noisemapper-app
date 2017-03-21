@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import no.uio.ifi.akosp.noisemapper.model.converters.InCallStateConverter;
+import no.uio.ifi.akosp.noisemapper.model.converters.MicSourceConverter;
 import no.uio.ifi.akosp.noisemapper.model.converters.OrientationConverter;
 import no.uio.ifi.akosp.noisemapper.model.converters.SimpleLocationConverter;
 
@@ -34,6 +35,7 @@ public class State implements Serializable, Cloneable {
     public static final int CHANGE_ROLL = 1 << 4;
     public static final int CHANGE_IN_CALL_STATE = 1 << 5;
     public static final int CHANGE_LOCATION = 1 << 6;
+    public static final int CHANGE_MIC_SOURCE = 1 << 7;
 
     public static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy. MM. dd. HH:mm.ss", Locale.US);
 
@@ -57,11 +59,14 @@ public class State implements Serializable, Cloneable {
 
     protected int stepCount;
 
+    @Convert(converter = MicSourceConverter.class, columnType = String.class)
+    protected MicSource micSource;
+
     protected transient int changes;
 
     public State() {}
 
-    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, int stepCount, Date timestamp) {
+    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, int stepCount, MicSource micSource, Date timestamp) {
         this.orientation = position;
         this.proximity = proximity;
         this.proximityText = proximityText;
@@ -70,12 +75,13 @@ public class State implements Serializable, Cloneable {
         this.inCallState = inCallState;
         this.location = SimpleLocation.fromLocation(location);
         this.stepCount = stepCount;
+        this.micSource = micSource;
         this.timestamp = timestamp;
     }
 
-    @Generated(hash = 1178323427)
-    public State(Long id, Orientation orientation, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, SimpleLocation location, Date timestamp,
-            int stepCount) {
+    @Generated(hash = 69462984)
+    public State(Long id, Orientation orientation, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, SimpleLocation location, Date timestamp, int stepCount,
+            MicSource micSource) {
         this.id = id;
         this.orientation = orientation;
         this.proximity = proximity;
@@ -86,6 +92,7 @@ public class State implements Serializable, Cloneable {
         this.location = location;
         this.timestamp = timestamp;
         this.stepCount = stepCount;
+        this.micSource = micSource;
     }
 
     public String getTimestampString() {
@@ -214,5 +221,13 @@ public class State implements Serializable, Cloneable {
 
     public void setStepCount(int stepCount) {
         this.stepCount = stepCount;
+    }
+
+    public MicSource getMicSource() {
+        return micSource;
+    }
+
+    public void setMicSource(MicSource micSource) {
+        this.micSource = micSource;
     }
 }

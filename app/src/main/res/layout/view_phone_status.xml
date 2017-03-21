@@ -94,12 +94,11 @@
                     android:clickable="false" />
 
                 <CheckBox
-                    android:id="@+id/checkBox3"
+                    android:id="@+id/isHeadset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:clickable="false"
-                    android:visibility="gone" />
+                    android:text="Headset plugged in"
+                    android:clickable="false" />
 
                 <CheckBox
                     android:id="@+id/checkBox4"
