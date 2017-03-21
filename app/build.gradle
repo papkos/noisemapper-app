@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId "no.uio.ifi.akosp.noisemapper"
-        minSdkVersion 16 // MediaExtractor was added in API16
+        minSdkVersion 19 // MediaExtractor was added in API16, StepDetector in API19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"

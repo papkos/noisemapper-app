@@ -15,6 +15,7 @@ import no.uio.ifi.akosp.noisemapper.model.State;
 public class TempRecordingStorage {
     private Map<UUID, File> files = new HashMap<>();
     private Map<UUID, State> states = new HashMap<>();
+    private Map<UUID, Integer> stepCounts = new HashMap<>();
     private final RecordingReadyHandler handler;
 
     public TempRecordingStorage(RecordingReadyHandler handler) {
@@ -31,9 +32,26 @@ public class TempRecordingStorage {
         checkAndProcess(uuid);
     }
 
+    public void registerStartStepCount(UUID uuid, int startStepCount) {
+        stepCounts.put(uuid, startStepCount);
+    }
+
+    public void registerStopStepCount(UUID uuid, int stopStepCount) {
+        if (stepCounts.containsKey(uuid)) {
+            int startStepCount = stepCounts.get(uuid);
+            stepCounts.put(uuid, stopStepCount - startStepCount);
+        }
+    }
+
     private void checkAndProcess(UUID uuid) {
         if (files.containsKey(uuid) && states.containsKey(uuid)) {
-            handler.handleRecordingReady(uuid, files.get(uuid), states.get(uuid));
+            final State state = states.get(uuid);
+            if (stepCounts.containsKey(uuid)) {
+                int stepCount = stepCounts.get(uuid);
+                state.setStepCount(stepCount);
+                stepCounts.remove(uuid);
+            }
+            handler.handleRecordingReady(uuid, files.get(uuid), state);
             files.remove(uuid);
             states.remove(uuid);
         }

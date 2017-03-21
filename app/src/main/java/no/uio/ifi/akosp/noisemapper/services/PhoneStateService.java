@@ -184,6 +184,10 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         }
     };
 
+    public int getGlobalStepCount() {
+        return globalStepCount;
+    }
+
     protected void fetchPhoneState() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         int state = telephonyManager.getCallState();
@@ -220,6 +224,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        stepDetector = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
         // Step counter is registered all the time
         sensorManager.registerListener(stepDetectorListener, stepDetector, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -279,10 +284,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
             Iterator<PhoneStateRequest> it = requests.iterator();
             while (it.hasNext()) {
                 PhoneStateRequest request = it.next();
-                int stepCount = globalStepCount - request.initialStepCount;
-                State clonedState = state.clone();
-                clonedState.setStepCount(stepCount);
-                request.listener.onStateAvailable(request.uuid, clonedState);
+                request.listener.onStateAvailable(request.uuid, state);
                 it.remove();
             }
         }
@@ -297,7 +299,6 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     }
 
     public void requestPhoneState(PhoneStateRequest request) {
-        request.initialStepCount = globalStepCount;
         requests.add(request);
         registerEvents();
     }
@@ -435,7 +436,6 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         public final PhoneStateRequestListener listener;
         @NonNull
         public final Date timestamp;
-        public int initialStepCount = 0;  // Set later, when the request is received by PhoneStateService
 
         public PhoneStateRequest(@NonNull PhoneStateRequestListener listener) {
             this(null, listener, new Date());

@@ -105,6 +105,7 @@ public class ListenerService extends Service
                 psService.requestPhoneState(
                         new PhoneStateService.PhoneStateRequest(uuid, ListenerService.this)
                 );
+                tempRecordingStorage.registerStartStepCount(uuid, psService.getGlobalStepCount());
             }
         }
     };
@@ -117,6 +118,10 @@ public class ListenerService extends Service
                         intent.getAction(), intent.getExtras()));
                 UUID uuid = (UUID) intent.getSerializableExtra(Signals.EXTRA_UUID);
                 File file = (File) intent.getSerializableExtra(Signals.EXTRA_FILE);
+
+                // Has to come before addFile, so that when the file is added, and the complete
+                // recording is announced, we have the stepCount too.
+                tempRecordingStorage.registerStopStepCount(uuid, psService.getGlobalStepCount());
                 tempRecordingStorage.addFile(uuid, file);
             }
         }
