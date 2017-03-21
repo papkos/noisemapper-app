@@ -1,6 +1,7 @@
 package no.uio.ifi.akosp.noisemapper;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -70,6 +71,7 @@ public class Utils {
             root.put("light", state.getLight());
             root.put("inPocket", state.isInPocket());
             root.put("inCallState", state.getInCallState().name());
+            root.put("stepCount", state.getStepCount());
             root.put("timestamp", state.getTimestampString());
 
         } catch (JSONException e) {
@@ -181,6 +183,24 @@ public class Utils {
         }
     }
 
+    /**
+     * Source: http://stackoverflow.com/a/3758880/1119508
+     * @param bytes
+     * @param si
+     * @return
+     */
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public static String humanReadableByteCount(long bytes) {
+        return humanReadableByteCount(bytes, false);
+    }
+
     /* methods using a Context ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     public static void sendRefreshBroadcast(Context context) {
@@ -194,22 +214,29 @@ public class Utils {
         return new DaoMaster(db).newSession();
     }
 
-
-    public static String humanReadableByteCount(long bytes) {
-        return humanReadableByteCount(bytes, false);
+    public static void exportDatabase(Context context) {
+        exportDatabase(context, context.getString(R.string.databaseName));
     }
 
-    /**
-     * Source: http://stackoverflow.com/a/3758880/1119508
-     * @param bytes
-     * @param si
-     * @return
-     */
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    public static void exportDatabase(Context context, String databaseName) {
+        try {
+            File data = Environment.getDataDirectory();
+            File sd = Environment.getExternalStorageDirectory();
+
+            if (sd.canWrite()) {
+                String currentDBPath = "/data/" + context.getPackageName() + "/databases/" + databaseName;
+                String backupDBPath = "temp";
+                File currentDB = new File(data, currentDBPath);
+                File backupDbDir = new File(sd, backupDBPath);
+                backupDbDir.mkdirs();
+                File backupDb = new File(backupDbDir, databaseName + "_backup");
+
+                if (currentDB.exists()) {
+                    copyFile(currentDB, backupDb);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -22,7 +22,7 @@ import no.uio.ifi.akosp.noisemapper.model.converters.SimpleLocationConverter;
  * @author Ákos Pap
  */
 @Entity
-public class State implements Serializable {
+public class State implements Serializable, Cloneable {
 
     static final long serialVersionUID = 1L;
 
@@ -54,11 +54,14 @@ public class State implements Serializable {
     protected SimpleLocation location;
 
     protected Date timestamp;
+
+    protected int stepCount;
+
     protected transient int changes;
 
     public State() {}
 
-    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, Date timestamp) {
+    public State(Orientation position, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, Location location, int stepCount, Date timestamp) {
         this.orientation = position;
         this.proximity = proximity;
         this.proximityText = proximityText;
@@ -66,12 +69,13 @@ public class State implements Serializable {
         this.inPocket = inPocket;
         this.inCallState = inCallState;
         this.location = SimpleLocation.fromLocation(location);
+        this.stepCount = stepCount;
         this.timestamp = timestamp;
     }
 
-    @Generated(hash = 732673001)
-    public State(Long id, Orientation orientation, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, SimpleLocation location,
-            Date timestamp) {
+    @Generated(hash = 1178323427)
+    public State(Long id, Orientation orientation, float proximity, String proximityText, float light, boolean inPocket, InCallState inCallState, SimpleLocation location, Date timestamp,
+            int stepCount) {
         this.id = id;
         this.orientation = orientation;
         this.proximity = proximity;
@@ -81,6 +85,7 @@ public class State implements Serializable {
         this.inCallState = inCallState;
         this.location = location;
         this.timestamp = timestamp;
+        this.stepCount = stepCount;
     }
 
     public String getTimestampString() {
@@ -101,10 +106,22 @@ public class State implements Serializable {
             sb.append("(inPocket=").append(inPocket).append(")");
             sb.append("(inCallState=").append(inCallState.toString()).append(")");
             sb.append("(location=").append(location.toString()).append(")");
+            sb.append("(stepCount=").append(stepCount).append(")");
 
         sb.append("]");
 
         return sb.toString();
+    }
+
+    @Override
+    public State clone() {
+        // Just to make it public
+        try {
+            return (State) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return new State();
+        }
     }
 
     public Long getId() {
@@ -191,4 +208,11 @@ public class State implements Serializable {
         return this.inPocket;
     }
 
+    public int getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(int stepCount) {
+        this.stepCount = stepCount;
+    }
 }

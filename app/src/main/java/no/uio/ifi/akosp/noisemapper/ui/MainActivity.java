@@ -196,6 +196,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onRequestCleanFiles() {
+        for (File f : getApplicationContext().getDir("recordings", Context.MODE_PRIVATE).listFiles()) {
+            f.delete();
+        }
+    }
+
+    @Override
+    public void onRequestDumpDatabase() {
+        Utils.exportDatabase(getApplicationContext());
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_options, menu);

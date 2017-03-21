@@ -58,6 +58,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     protected Sensor magnetometer;
     protected Sensor proximitySensor;
     protected Sensor lightSensor;
+    protected Sensor stepDetector;
     protected LocationManager locationManager;
 
     float[] mGravity;
@@ -170,6 +171,19 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         }
     };
 
+    private int globalStepCount = 0;
+    protected SensorEventListener stepDetectorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            globalStepCount++;
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
+
     protected void fetchPhoneState() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         int state = telephonyManager.getCallState();
@@ -206,6 +220,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        // Step counter is registered all the time
+        sensorManager.registerListener(stepDetectorListener, stepDetector, SensorManager.SENSOR_DELAY_NORMAL);
 
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -257,13 +273,16 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
 
 
         State state = new State(orientation, proximity, makeProximityText(proximity), light,
-                Utils.isInPocket(orientation, proximity, light), inCallState, location, new Date());
+                Utils.isInPocket(orientation, proximity, light), inCallState, location, 0, new Date());
 
         if (!requests.isEmpty()) {
             Iterator<PhoneStateRequest> it = requests.iterator();
             while (it.hasNext()) {
                 PhoneStateRequest request = it.next();
-                request.listener.onStateAvailable(request.uuid, state);
+                int stepCount = globalStepCount - request.initialStepCount;
+                State clonedState = state.clone();
+                clonedState.setStepCount(stepCount);
+                request.listener.onStateAvailable(request.uuid, clonedState);
                 it.remove();
             }
         }
@@ -278,6 +297,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
     }
 
     public void requestPhoneState(PhoneStateRequest request) {
+        request.initialStepCount = globalStepCount;
         requests.add(request);
         registerEvents();
     }
@@ -294,6 +314,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         super.onDestroy();
         unregisterFromEvents();
         mGoogleApiClient.disconnect();
+        // Step counter is registered all the time
+        sensorManager.unregisterListener(stepDetectorListener);
     }
 
     private void registerEvents() {
@@ -316,6 +338,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         sensorManager.registerListener(orientationListener, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(proximityListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        // Step counter is registered all the time
+        // sensorManager.registerListener(stepDetectorListener, stepDetector, SensorManager.SENSOR_DELAY_NORMAL);
 
         // Register the listener with the Location Manager to receive location updates
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -340,6 +364,8 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         sensorManager.unregisterListener(orientationListener);
         sensorManager.unregisterListener(proximityListener);
         sensorManager.unregisterListener(lightSensorListener);
+        // Step counter is registered all the time
+        // sensorManager.unregisterListener(stepDetectorListener);
 
         // Remove the listener you previously added
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -409,6 +435,7 @@ public class PhoneStateService extends Service implements GoogleApiClient.Connec
         public final PhoneStateRequestListener listener;
         @NonNull
         public final Date timestamp;
+        public int initialStepCount = 0;  // Set later, when the request is received by PhoneStateService
 
         public PhoneStateRequest(@NonNull PhoneStateRequestListener listener) {
             this(null, listener, new Date());

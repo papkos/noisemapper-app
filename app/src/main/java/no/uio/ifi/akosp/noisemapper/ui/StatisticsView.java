@@ -34,6 +34,16 @@ public class StatisticsView extends CardView {
         public void onRequestUploadAll() {
             Log.w(TAG, "Callback not registered!");
         }
+
+        @Override
+        public void onRequestCleanFiles() {
+            Log.w(TAG, "Callback not registered!");
+        }
+
+        @Override
+        public void onRequestDumpDatabase() {
+            Log.w(TAG, "Callback not registered!");
+        }
     };
 
     @Bind(R.id.cntRecords)
@@ -49,6 +59,11 @@ public class StatisticsView extends CardView {
     protected Button processAllButton;
     @Bind(R.id.uploadAll)
     protected Button uploadAllButton;
+
+    @Bind(R.id.cleanFiles)
+    protected Button cleanFilesButton;
+    @Bind(R.id.dumpDatabase)
+    protected Button dumpDatabaseButton;
 
     protected boolean ready = false;
 
@@ -82,6 +97,21 @@ public class StatisticsView extends CardView {
                 callback.onRequestUploadAll();
             }
         });
+
+        cleanFilesButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.onRequestCleanFiles();
+            }
+        });
+
+        dumpDatabaseButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.onRequestDumpDatabase();
+            }
+        });
+
         ready = true;
     }
 
@@ -181,6 +211,8 @@ public class StatisticsView extends CardView {
     public interface StatisticsViewInteractionListener {
         void onRequestProcessAll();
         void onRequestUploadAll();
+        void onRequestCleanFiles();
+        void onRequestDumpDatabase();
     }
 
     public static class Statistics {
