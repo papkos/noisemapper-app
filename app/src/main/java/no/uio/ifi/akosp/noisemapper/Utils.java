@@ -24,6 +24,8 @@ import no.uio.ifi.akosp.noisemapper.model.Orientation;
 import no.uio.ifi.akosp.noisemapper.model.SimpleLocation;
 import no.uio.ifi.akosp.noisemapper.model.State;
 
+import static no.uio.ifi.akosp.noisemapper.R.string.databaseName;
+
 /**
  * Created on 2016.04.23..
  *
@@ -202,6 +204,27 @@ public class Utils {
         return humanReadableByteCount(bytes, false);
     }
 
+    public static void exportRecording(String filename) {
+        try {
+            File data = Environment.getDataDirectory();
+            File sd = Environment.getExternalStorageDirectory();
+
+            if (sd.canWrite()) {
+                String exportPath = "temp";
+                File recordingFile = new File(filename);
+                File exportDir = new File(sd, exportPath);
+                exportDir.mkdirs();
+                File destFile = new File(exportDir, recordingFile.getName());
+
+                if (recordingFile.exists()) {
+                    copyFile(recordingFile, destFile);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /* methods using a Context ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     public static void sendRefreshBroadcast(Context context) {
@@ -210,13 +233,13 @@ public class Utils {
     }
 
     public static DaoSession getDaoSession(Context context) {
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getString(R.string.databaseName));
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getString(databaseName));
         Database db = helper.getWritableDb();
         return new DaoMaster(db).newSession();
     }
 
     public static void exportDatabase(Context context) {
-        exportDatabase(context, context.getString(R.string.databaseName));
+        exportDatabase(context, context.getString(databaseName));
     }
 
     public static void exportDatabase(Context context, String databaseName) {

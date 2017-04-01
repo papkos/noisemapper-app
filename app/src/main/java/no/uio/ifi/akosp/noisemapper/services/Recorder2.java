@@ -68,7 +68,7 @@ public class Recorder2 implements Runnable {
             Log.d(TAG, "Creating the buffer of size " + BUFFER_SIZE);
             byte[] buffer = new byte[BUFFER_SIZE];
 
-            AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+            AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,
                     RECORDING_RATE, CHANNEL, FORMAT, BUFFER_SIZE * 10);
             try {
                 recorder.startRecording();

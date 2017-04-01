@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 import no.uio.ifi.akosp.noisemapper.R;
+import no.uio.ifi.akosp.noisemapper.Utils;
 import no.uio.ifi.akosp.noisemapper.model.ProcessedRecord;
 
 /**
@@ -59,6 +61,14 @@ public class RWAdapter extends RecyclerView.Adapter<RWAdapter.RWViewHolder> {
         }
     };
 
+    private final RWViewHolder.ItemOnLongClickListener itemOnLongClickListener = new RWViewHolder.ItemOnLongClickListener() {
+        @Override
+        public void onItemLongClicked(int position) {
+            RecordWrapper item = dataset.get(position);
+            Utils.exportRecording(item.record.getFilename());
+        }
+    };
+
     public RWAdapter() {
         this.dataset = new ArrayList<>();
     }
@@ -80,7 +90,7 @@ public class RWAdapter extends RecyclerView.Adapter<RWAdapter.RWViewHolder> {
     public RWAdapter.RWViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_record_wrapper, parent, false);
-        return new RWViewHolder(view, itemOnClickListener);
+        return new RWViewHolder(view, itemOnClickListener, itemOnLongClickListener);
     }
 
     @Override
@@ -125,7 +135,7 @@ public class RWAdapter extends RecyclerView.Adapter<RWAdapter.RWViewHolder> {
         TextView dataView;
         CheckBox selectionIndicatorView;
 
-        RWViewHolder(View itemView, final ItemOnClickListener onClickListener) {
+        RWViewHolder(View itemView, final ItemOnClickListener onClickListener, final ItemOnLongClickListener onLongClickListener) {
             super(itemView);
             timestampView = (TextView) itemView.findViewById(R.id.timestamp);
             dataView = (TextView) itemView.findViewById(R.id.data);
@@ -135,13 +145,25 @@ public class RWAdapter extends RecyclerView.Adapter<RWAdapter.RWViewHolder> {
                 @Override
                 public void onClick(View view) {
                     onClickListener.onItemClicked(getAdapterPosition());
+                }
+            });
 
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    onLongClickListener.onItemLongClicked(getAdapterPosition());
+                    Toast.makeText(v.getContext(), "Exported", Toast.LENGTH_SHORT).show();
+                    return true;
                 }
             });
         }
 
         interface ItemOnClickListener {
             void onItemClicked(int position);
+        }
+
+        interface ItemOnLongClickListener {
+            void onItemLongClicked(int position);
         }
     }
 

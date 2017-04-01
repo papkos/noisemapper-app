@@ -169,14 +169,18 @@ public class ProcessorService2 extends IntentService {
     }
 
 
-    public static final double REFERENCE_MINIMUM_PRESSURE = 0.00002; // Pa(scal)
-    public static final double REFERENCE_MAXIMUM_PRESSURE = 0.6325; // Pa(scal)
-    public static final double RATIO = Short.MAX_VALUE / REFERENCE_MAXIMUM_PRESSURE;
+    public static final double REFERENCE_MINIMUM_PRESSURE = 0.00002; // Pa(scal) // "lower"
+    public static final double REFERENCE_MAXIMUM_PRESSURE = 0.6325; // Pa(scal) // "higher"
+    // slope = (higher - lower) / (maxval - minval)
+    public static final double SLOPE = (REFERENCE_MAXIMUM_PRESSURE - REFERENCE_MINIMUM_PRESSURE) / (Short.MAX_VALUE - 0);
 
-    /**
-     * Source: http://stackoverflow.com/a/14870458/1119508
-     */
+    private static double amplitudeToPressure(double amplitude) {
+        // lower + slope * (val - minval)
+        return REFERENCE_MINIMUM_PRESSURE + SLOPE * (amplitude - 0);
+    }
+
     private static double toDbA(double amplitude) {
-        return 20 * Math.log10(amplitude / RATIO / REFERENCE_MINIMUM_PRESSURE);
+        // 20 * log(p / p0)
+        return 20 * Math.log10(amplitudeToPressure(amplitude) / REFERENCE_MINIMUM_PRESSURE);
     }
 }
