@@ -30,6 +30,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        buildTypes.each {
+            it.resValue 'string', 'defaultHost', noiseMapperDefaultHost
+            it.resValue 'string', 'api_auth_local', noiseMapperApiAuthLocal
+            it.resValue 'string', 'api_auth_remote', noiseMapperApiAuthRemote
+            it.resValue 'string', 'google_maps_key', noiseMapperGoogleMapsApiKey
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

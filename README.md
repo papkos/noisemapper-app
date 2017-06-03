@@ -11,7 +11,15 @@ analyzes them and then uploads them to a server.
 While recording, it also collects environment metadata, e.g. GPS, time, light, proximity.
 
 ## How to compile?
-Open in Android Studio, then "Just works™".
+1. Create or open `~/.gradle/gradle.properties` file, and add the following lines with your data
+    ```ini
+    # NoiseMapper secrets
+    noiseMapperDefaultHost=https://<YOUR_HOST>
+    noiseMapperApiAuthRemote=<The same as you used on the server>
+    noiseMapperGoogleMapsApiKey=<The one you got from Google (starts with AIza)>
+    ```
+
+2. Open project in Android Studio, then *Just works™*.
 
 ## How to use?
 Copy over the APK to the device, then install.  
